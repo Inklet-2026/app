@@ -8,11 +8,12 @@ export default function App() {
       display: "flex",
       flexDirection: "column",
       background: "var(--bg)",
-      padding: "36px 16px 16px",
+      paddingTop: 6,
     }}>
       <Header />
-      <div style={{ height: 12 }} />
-      <InputBox />
+      <div style={{ flex: 1, padding: "6px 12px 12px", display: "flex", flexDirection: "column" }}>
+        <InputBox />
+      </div>
     </div>
   );
 }

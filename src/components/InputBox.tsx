@@ -24,6 +24,7 @@ export default function InputBox() {
   const [showLink, setShowLink] = useState(false);
   const [mode, setMode] = useState<"auto" | "manual">("auto");
   const [deviceId, setDeviceId] = useState<string | null>(null);
+  const [duration, setDuration] = useState("1h");
   const [submitting, setSubmitting] = useState(false);
 
   function addAttachment(a: Attachment) {
@@ -162,7 +163,7 @@ export default function InputBox() {
 
           {/* Right: mode + submit */}
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <ModeSwitch mode={mode} deviceId={deviceId} onModeChange={setMode} onDeviceChange={setDeviceId} />
+            <ModeSwitch mode={mode} deviceId={deviceId} duration={duration} onModeChange={setMode} onDeviceChange={setDeviceId} onDurationChange={setDuration} />
 
             <button
               onClick={handleSubmit}
