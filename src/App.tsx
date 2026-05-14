@@ -1,5 +1,8 @@
 import { useAppStore } from "./stores/appStore";
 import { useTauriWindow } from "./hooks/useTauriWindow";
+import InputBar from "./components/InputBar";
+import PushModeSelector from "./components/PushModeSelector";
+import StatusIndicator from "./components/StatusIndicator";
 import BottomNav from "./components/BottomNav";
 
 function ViewContent() {
@@ -13,8 +16,6 @@ function ViewContent() {
 
 export default function App() {
   const mode = useAppStore((s) => s.mode);
-  const toggleMode = useAppStore((s) => s.toggleMode);
-
   useTauriWindow();
 
   return (
@@ -32,17 +33,16 @@ export default function App() {
       )}
 
       <div className="px-4 py-2">
-        <div
-          className="flex items-center gap-2 bg-gray-50 rounded-lg border border-gray-200 px-3 py-2 cursor-text"
-          onClick={() => { if (mode === "mini") toggleMode(); }}
-        >
-          <span className="text-gray-300 text-sm">+</span>
-          <span className="flex-1 text-gray-400 text-sm">Push content to device...</span>
-          <span className="w-7 h-7 rounded-md bg-gray-900 flex items-center justify-center text-white text-xs">
-            ↑
-          </span>
-        </div>
+        <InputBar />
       </div>
+
+      {mode === "expanded" && (
+        <div className="px-4 pb-2">
+          <PushModeSelector />
+        </div>
+      )}
+
+      <StatusIndicator />
 
       {mode === "expanded" && (
         <>
