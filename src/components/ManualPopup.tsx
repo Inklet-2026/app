@@ -19,7 +19,7 @@ const DURATIONS = [
 export default function ManualPopup() {
   const params = new URLSearchParams(window.location.search);
   const [deviceId, setDeviceId] = useState(params.get("deviceId") || "");
-  const [duration, setDuration] = useState(params.get("duration") || "1h");
+  const [duration, setDuration] = useState(params.get("duration") || "");
 
   function handleSelect(did: string) {
     setDeviceId(did);

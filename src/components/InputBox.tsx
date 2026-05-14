@@ -43,7 +43,7 @@ export default function InputBox() {
   const [showLink, setShowLink] = useState(false);
   const [mode, setMode] = useState<"auto" | "manual">("auto");
   const [deviceId, setDeviceId] = useState<string | null>(null);
-  const [duration, setDuration] = useState("1h");
+  const [duration, setDuration] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitState, setSubmitState] = useState<"idle" | "loading" | "success">("idle");
 
