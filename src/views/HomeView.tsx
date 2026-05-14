@@ -23,6 +23,8 @@ function remainingTime(expiresAt: string | null): string | null {
   return `${mins}m left`;
 }
 
+const typeIcon: Record<string, string> = { url: "🔗", image: "🖼", text: "📝", file: "📄" };
+
 export default function HomeView() {
   const [records, setRecords] = useState<PushRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,30 +38,44 @@ export default function HomeView() {
   }, [lastResult]);
 
   if (loading) {
-    return <p className="text-xs text-gray-400 text-center py-4">Loading...</p>;
+    return <p className="text-[12px] text-center py-6" style={{ color: "var(--text-muted)" }}>Loading...</p>;
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <p className="text-xs text-gray-400 font-medium">Recent pushes</p>
+    <div className="flex flex-col gap-1.5">
+      <p className="text-[11px] tracking-[0.05em] uppercase mb-1" style={{ color: "var(--text-muted)" }}>
+        Recent pushes
+      </p>
       {records.map((r) => (
-        <div key={r.id} className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-lg">
-          <div className="w-8 h-8 rounded-md bg-gray-200 flex items-center justify-center text-xs text-gray-500 shrink-0">
-            {r.contentType === "url" ? "🔗" : r.contentType === "image" ? "🖼" : "📝"}
+        <div
+          key={r.id}
+          className="flex items-center gap-3 p-2.5"
+          style={{ background: "var(--bg-card)", borderRadius: 8 }}
+        >
+          <div
+            className="flex items-center justify-center text-[14px] shrink-0"
+            style={{ width: 32, height: 32, borderRadius: 7, background: "var(--bg-input)" }}
+          >
+            {typeIcon[r.contentType] ?? "📝"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-gray-800 truncate">{r.content}</p>
-            <p className="text-[11px] text-gray-400 mt-0.5">
+            <p className="text-[13px] truncate" style={{ color: "var(--text)" }}>{r.content}</p>
+            <p className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
               {timeAgo(r.createdAt)}
               {r.pushMode === "manual" && r.deviceName && ` → ${r.deviceName}`}
               {r.pushMode === "manual" && r.expiresAt && (
-                <span className="text-amber-500 ml-1">{remainingTime(r.expiresAt)}</span>
+                <span style={{ color: "#B8860B", marginLeft: 4 }}>{remainingTime(r.expiresAt)}</span>
               )}
             </p>
           </div>
-          <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-            r.status === "distributed" ? "bg-green-50 text-green-600" : "bg-amber-50 text-amber-600"
-          }`}>
+          <span
+            className="text-[10px] px-1.5 py-0.5"
+            style={{
+              borderRadius: 4,
+              background: r.status === "distributed" ? "#E8F0E8" : "#F5F0E0",
+              color: r.status === "distributed" ? "#3A6A3A" : "#8A7A3A",
+            }}
+          >
             {r.status}
           </span>
         </div>

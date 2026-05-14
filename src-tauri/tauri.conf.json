@@ -19,9 +19,9 @@
         "transparent": true,
         "alwaysOnTop": true,
         "center": true,
-        "visible": false,
+        "visible": true,
         "resizable": false,
-        "shadow": false
+        "shadow": true
       }
     ],
     "security": { "csp": null }

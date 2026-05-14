@@ -106,14 +106,16 @@ pub fn run() {
         .setup(|app| {
             setup_tray(app)?;
             setup_shortcut(app)?;
-            if let Some(w) = app.get_webview_window("main") {
-                let w2 = w.clone();
-                w.on_window_event(move |event| {
-                    if let tauri::WindowEvent::Focused(false) = event {
-                        let _ = w2.hide();
-                    }
-                });
-            }
+            // Click-outside-to-hide: disabled during dev for easier debugging.
+            // Re-enable for production by uncommenting below.
+            // if let Some(w) = app.get_webview_window("main") {
+            //     let w2 = w.clone();
+            //     w.on_window_event(move |event| {
+            //         if let tauri::WindowEvent::Focused(false) = event {
+            //             let _ = w2.hide();
+            //         }
+            //     });
+            // }
             Ok(())
         })
         .run(tauri::generate_context!())

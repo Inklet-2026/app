@@ -15,10 +15,19 @@ export default function StatusIndicator() {
   if (!lastResult) return null;
 
   return (
-    <div className="mx-4 mb-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-xs text-green-700">
-      Pushed: {lastResult.content.slice(0, 50)}{lastResult.content.length > 50 ? "..." : ""}
+    <div
+      className="mx-5 mb-2 px-3 py-2 text-[12px]"
+      style={{
+        background: "#E8F0E8",
+        border: "1px solid #C8D8C8",
+        borderRadius: 8,
+        color: "#3A6A3A",
+      }}
+    >
+      Pushed: {lastResult.content.slice(0, 50)}
+      {lastResult.content.length > 50 ? "..." : ""}
       {lastResult.pushMode === "manual" && lastResult.deviceName && (
-        <span className="text-green-500"> → {lastResult.deviceName}</span>
+        <span style={{ opacity: 0.7 }}> → {lastResult.deviceName}</span>
       )}
     </div>
   );

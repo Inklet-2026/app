@@ -15,34 +15,60 @@ export default function PushModeSelector() {
   const devices = useDeviceStore((s) => s.devices);
 
   return (
-    <div className="flex flex-col gap-2 text-xs">
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setPushMode("auto")}
-          className={`px-3 py-1 rounded-md ${pushMode === "auto" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500"}`}
-        >Auto</button>
-        <button
-          onClick={() => setPushMode("manual")}
-          className={`px-3 py-1 rounded-md ${pushMode === "manual" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500"}`}
-        >Manual</button>
+    <div className="flex flex-col gap-2.5 text-[12px]">
+      <div className="flex items-center gap-1.5">
+        {(["auto", "manual"] as const).map((m) => (
+          <button
+            key={m}
+            onClick={() => setPushMode(m)}
+            className="px-3 py-[5px] transition-all capitalize"
+            style={{
+              borderRadius: 7,
+              background: pushMode === m ? "var(--accent)" : "var(--bg-card)",
+              color: pushMode === m ? "var(--bg)" : "var(--text-secondary)",
+              fontWeight: pushMode === m ? 500 : 400,
+            }}
+          >
+            {m}
+          </button>
+        ))}
       </div>
+
       {pushMode === "manual" && (
         <div className="flex flex-col gap-2">
           <select
             value={selectedDeviceId ?? ""}
             onChange={(e) => setSelectedDeviceId(e.target.value || null)}
-            className="bg-gray-50 border border-gray-200 rounded-md px-2 py-1 text-gray-700 outline-none"
+            className="outline-none text-[12px]"
+            style={{
+              background: "var(--bg-card)",
+              border: "1px solid var(--border)",
+              borderRadius: 7,
+              padding: "5px 8px",
+              color: "var(--text-secondary)",
+            }}
           >
             <option value="">Select device...</option>
             {devices.filter((d) => d.status === "online").map((d) => (
               <option key={d.id} value={d.id}>{d.name}</option>
             ))}
           </select>
+
           <div className="flex flex-wrap gap-1">
             {DURATIONS.map((d) => (
-              <button key={d} onClick={() => setSelectedDuration(d)}
-                className={`px-2 py-0.5 rounded ${selectedDuration === d ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500"}`}
-              >{DURATION_LABELS[d]}</button>
+              <button
+                key={d}
+                onClick={() => setSelectedDuration(d)}
+                className="px-2 py-[3px] transition-all"
+                style={{
+                  borderRadius: 5,
+                  background: selectedDuration === d ? "var(--accent)" : "var(--bg-card)",
+                  color: selectedDuration === d ? "var(--bg)" : "var(--text-muted)",
+                  fontSize: 11,
+                }}
+              >
+                {DURATION_LABELS[d]}
+              </button>
             ))}
           </div>
         </div>
