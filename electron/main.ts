@@ -12,11 +12,12 @@ function createWindow() {
     height: 185,
     titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 14, y: 12 },
+    transparent: true,
+    hasShadow: true,
     alwaysOnTop: true,
     resizable: false,
     maximizable: false,
     fullscreenable: false,
-    backgroundColor: "#F5F3ED",
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
       contextIsolation: true,
