@@ -10,7 +10,7 @@ function genId() {
 
 const W = 500;
 const H_BASE = 177;
-const H_ATTACHMENTS = 82;
+const H_ATTACHMENTS = 80;
 const H_DROPDOWN = 200;
 
 const toolBtn: React.CSSProperties = {
@@ -33,11 +33,18 @@ export default function InputBox() {
   const [submitting, setSubmitting] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const prevAttachCount = useRef(0);
   useEffect(() => {
     let h = H_BASE;
     if (attachments.length > 0) h += H_ATTACHMENTS;
     if (dropdownOpen) h += H_DROPDOWN;
-    (window as any).electronAPI?.resizeWindow(W, h);
+    const growing = attachments.length > prevAttachCount.current;
+    prevAttachCount.current = attachments.length;
+    if (growing) {
+      setTimeout(() => (window as any).electronAPI?.resizeWindow(W, h), 30);
+    } else {
+      (window as any).electronAPI?.resizeWindow(W, h);
+    }
   }, [attachments.length, dropdownOpen]);
 
   function addAttachment(a: Attachment) {
@@ -194,11 +201,17 @@ export default function InputBox() {
 
       {/* Attachments — OUTSIDE the input box, below it, animated expand */}
       <div style={{
-        maxHeight: attachments.length > 0 ? 90 : 0,
+        maxHeight: attachments.length > 0 ? 80 : 0,
         overflow: "hidden",
-        transition: "max-height 200ms ease-out",
+        transition: "max-height 180ms ease-out",
       }}>
-        <div style={{ paddingTop: 8 }}>
+        <div style={{
+          paddingTop: 6,
+          overflowX: "auto",
+          overflowY: "hidden",
+          scrollbarWidth: "thin",
+          scrollbarColor: "var(--border) transparent",
+        }}>
           <AttachmentList attachments={attachments} onRemove={removeAttachment} />
         </div>
       </div>
