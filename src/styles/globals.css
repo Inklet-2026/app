@@ -42,3 +42,13 @@ button, a, input, textarea, select, label {
 textarea, input, select {
   font-family: var(--font-sans);
 }
+
+@keyframes modalOverlayIn {
+  from { background: rgba(0,0,0,0); }
+  to { background: rgba(0,0,0,0.08); }
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.97) translateY(4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
