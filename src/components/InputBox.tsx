@@ -27,7 +27,7 @@ function ToolBtn({ onClick, title, children }: { onClick: () => void; title: str
         color: "var(--text-muted)", cursor: "pointer", padding: 0, flexShrink: 0,
         transition: "background 120ms",
       }}
-      onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-card)"}
+      onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg)"}
       onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
     >
       {children}
