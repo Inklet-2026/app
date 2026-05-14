@@ -57,7 +57,7 @@ export default function ModeSwitch({ mode, deviceId, duration, open, onModeChang
   }, [open, updatePos]);
 
   const pill: React.CSSProperties = {
-    fontSize: 11, padding: "4px 10px", cursor: "pointer",
+    fontSize: 11, padding: "0 10px", height: 30, cursor: "pointer",
     border: "none", fontFamily: "var(--font-sans)", fontWeight: 500,
     transition: "all 120ms",
   };

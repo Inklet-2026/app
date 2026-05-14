@@ -13,12 +13,27 @@ const H_BASE = 177;
 const H_ATTACHMENTS = 80;
 const H_DROPDOWN = 200;
 
-const toolBtn: React.CSSProperties = {
-  width: 30, height: 30, borderRadius: 8,
-  background: "var(--bg-card)", border: "1px solid var(--border)",
-  display: "flex", alignItems: "center", justifyContent: "center",
-  color: "var(--text-muted)", cursor: "pointer", padding: 0, flexShrink: 0,
-};
+const TOOL_SIZE = 30;
+
+function ToolBtn({ onClick, title, children }: { onClick: () => void; title: string; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      style={{
+        width: TOOL_SIZE, height: TOOL_SIZE, borderRadius: 8,
+        background: "transparent", border: "1px solid var(--border)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        color: "var(--text-muted)", cursor: "pointer", padding: 0, flexShrink: 0,
+        transition: "background 120ms",
+      }}
+      onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-card)"}
+      onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+    >
+      {children}
+    </button>
+  );
+}
 
 export default function InputBox() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -161,27 +176,27 @@ export default function InputBox() {
           flexShrink: 0,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <button style={toolBtn} onClick={() => fileRef.current?.click()} title="Upload image">
+            <ToolBtn onClick={() => fileRef.current?.click()} title="Upload image">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M7 2.5v6M4.5 5L7 2.5 9.5 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M2.5 11h9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
               </svg>
-            </button>
+            </ToolBtn>
             <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFile} />
 
-            <button style={toolBtn} onClick={handleClipboard} title="Paste from clipboard">
+            <ToolBtn onClick={handleClipboard} title="Paste from clipboard">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <rect x="3.5" y="3.5" width="7" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
                 <path d="M5.5 3.5V2.5a1 1 0 0 1 3 0v1" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
               </svg>
-            </button>
+            </ToolBtn>
 
-            <button style={toolBtn} onClick={() => setShowLink(true)} title="Add link">
+            <ToolBtn onClick={() => setShowLink(true)} title="Add link">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M6 8a3 3 0 0 0 4.24 0l1.42-1.42a3 3 0 0 0-4.24-4.24L7 2.76" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
                 <path d="M8 6a3 3 0 0 0-4.24 0L2.34 7.42a3 3 0 0 0 4.24 4.24L7 11.24" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
               </svg>
-            </button>
+            </ToolBtn>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
