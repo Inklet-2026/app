@@ -108,9 +108,10 @@ export default function InputBox() {
       <div style={{
         background: "var(--bg-input)", border: "1px solid var(--border)",
         borderRadius: 12, display: "flex", flexDirection: "column",
+        height: 150, flex: "0 0 150px", overflow: "hidden",
       }}>
-        {/* Textarea */}
-        <div style={{ padding: "12px 14px 0" }}>
+        {/* Textarea — shrinks when attachments are present */}
+        <div style={{ padding: "12px 14px 0", flex: 1, minHeight: 0, overflow: "hidden" }}>
           <textarea
             ref={textareaRef}
             value={content}
@@ -120,21 +121,22 @@ export default function InputBox() {
             placeholder="Push content to device..."
             rows={2}
             style={{
-              width: "100%", background: "transparent",
+              width: "100%", height: "100%", background: "transparent",
               border: "none", outline: "none", resize: "none",
               fontSize: 14, lineHeight: 1.5, color: "var(--text)",
-              padding: 0, margin: 0, minHeight: 48,
+              padding: 0, margin: 0,
             }}
           />
         </div>
 
-        {/* Attachments */}
+        {/* Attachments — fixed height row, scrolls horizontally */}
         <AttachmentList attachments={attachments} onRemove={removeAttachment} />
 
         {/* Toolbar */}
         <div style={{
-          padding: "8px 10px 10px",
+          padding: "6px 10px 8px",
           display: "flex", alignItems: "center", justifyContent: "space-between",
+          flexShrink: 0,
         }}>
           {/* Left tools */}
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>

@@ -11,7 +11,7 @@ export default function App() {
       paddingTop: 6,
     }}>
       <Header />
-      <div style={{ flex: 1, padding: "6px 12px 12px", display: "flex", flexDirection: "column" }}>
+      <div style={{ flex: 1, padding: "6px 12px 12px", display: "flex", flexDirection: "column", overflow: "visible" }}>
         <InputBox />
       </div>
     </div>

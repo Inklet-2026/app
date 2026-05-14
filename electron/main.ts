@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -9,7 +9,7 @@ let win: BrowserWindow | null = null;
 function createWindow() {
   win = new BrowserWindow({
     width: 500,
-    height: 230,
+    height: 240,
     titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 14, y: 14 },
     alwaysOnTop: true,
@@ -30,6 +30,10 @@ function createWindow() {
     win.loadFile(path.join(__dirname, "../dist/index.html"));
   }
 }
+
+ipcMain.on("resize-window", (_e, { width, height }: { width: number; height: number }) => {
+  if (win) win.setSize(width, height, true);
+});
 
 app.whenReady().then(createWindow);
 

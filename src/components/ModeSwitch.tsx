@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 const MOCK_DEVICES = [
   { id: "d1", name: "Study" },
@@ -27,15 +27,38 @@ interface Props {
 
 export default function ModeSwitch({ mode, deviceId, duration, onModeChange, onDeviceChange, onDurationChange }: Props) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLDivElement>(null);
+  const dropRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  const updatePos = useCallback(() => {
+    if (btnRef.current) {
+      const r = btnRef.current.getBoundingClientRect();
+      setPos({ x: r.right, y: r.top });
+    }
+  }, []);
 
   useEffect(() => {
-    function onClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    function onClickOutside(e: MouseEvent) {
+      if (
+        dropRef.current && !dropRef.current.contains(e.target as Node) &&
+        btnRef.current && !btnRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
     }
-    document.addEventListener("mousedown", onClick);
-    return () => document.removeEventListener("mousedown", onClick);
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (open) {
+      updatePos();
+      (window as any).electronAPI?.resizeWindow(500, 480);
+    } else {
+      (window as any).electronAPI?.resizeWindow(500, 240);
+    }
+  }, [open, updatePos]);
 
   const pill: React.CSSProperties = {
     fontSize: 11, padding: "4px 10px", cursor: "pointer",
@@ -44,53 +67,61 @@ export default function ModeSwitch({ mode, deviceId, duration, onModeChange, onD
   };
 
   return (
-    <div ref={ref} style={{ position: "relative" }}>
-      {/* Toggle pill */}
-      <div style={{
-        display: "flex", borderRadius: 7, overflow: "hidden",
-        border: "1px solid var(--border)",
-      }}>
-        <button
-          onClick={() => { onModeChange("auto"); setOpen(false); }}
-          style={{
-            ...pill,
-            background: mode === "auto" ? "var(--accent)" : "var(--bg-card)",
-            color: mode === "auto" ? "var(--bg)" : "var(--text-muted)",
-            borderRadius: 0,
-          }}
-        >Auto</button>
-        <button
-          onClick={() => {
-            onModeChange("manual");
-            setOpen(true);
-          }}
-          style={{
-            ...pill,
-            background: mode === "manual" ? "var(--accent)" : "var(--bg-card)",
-            color: mode === "manual" ? "var(--bg)" : "var(--text-muted)",
-            borderRadius: 0, borderLeft: "1px solid var(--border)",
-            display: "flex", alignItems: "center", gap: 3,
-          }}
-        >
-          {mode === "manual" && deviceId
-            ? MOCK_DEVICES.find((d) => d.id === deviceId)?.name ?? "Manual"
-            : "Manual"}
-          {mode === "manual" && (
-            <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-              <path d="M2 3l2 2 2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          )}
-        </button>
+    <>
+      <div ref={btnRef} style={{ position: "relative" }}>
+        <div style={{
+          display: "flex", borderRadius: 7, overflow: "hidden",
+          border: "1px solid var(--border)",
+        }}>
+          <button
+            onClick={() => { onModeChange("auto"); setOpen(false); }}
+            style={{
+              ...pill,
+              background: mode === "auto" ? "var(--accent)" : "var(--bg-card)",
+              color: mode === "auto" ? "var(--bg)" : "var(--text-muted)",
+              borderRadius: 0,
+            }}
+          >Auto</button>
+          <button
+            onClick={() => {
+              onModeChange("manual");
+              setOpen(!open);
+            }}
+            style={{
+              ...pill,
+              background: mode === "manual" ? "var(--accent)" : "var(--bg-card)",
+              color: mode === "manual" ? "var(--bg)" : "var(--text-muted)",
+              borderRadius: 0, borderLeft: "1px solid var(--border)",
+              display: "flex", alignItems: "center", gap: 3,
+            }}
+          >
+            {mode === "manual" && deviceId
+              ? MOCK_DEVICES.find((d) => d.id === deviceId)?.name ?? "Manual"
+              : "Manual"}
+            {mode === "manual" && (
+              <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                <path d="M2 3l2 2 2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
 
-      {/* Dropdown */}
+      {/* Dropdown — position: fixed so it's not clipped by any overflow */}
       {open && mode === "manual" && (
-        <div style={{
-          position: "absolute", bottom: "calc(100% + 6px)", right: 0,
-          background: "var(--bg)", border: "1px solid var(--border)",
-          borderRadius: 10, padding: 6, minWidth: 180,
-          boxShadow: "0 6px 24px rgba(0,0,0,0.1)", zIndex: 50,
-        }}>
+        <div
+          ref={dropRef}
+          style={{
+            position: "fixed",
+            top: Math.max(8, pos.y - 220),
+            left: pos.x - 190,
+            background: "var(--bg)",
+            border: "1px solid var(--border)",
+            borderRadius: 10, padding: 6, width: 186,
+            boxShadow: "0 6px 24px rgba(0,0,0,0.12)",
+            zIndex: 9999,
+          }}
+        >
           <p style={{ fontSize: 10, color: "var(--text-muted)", padding: "4px 8px 2px", margin: 0, textTransform: "uppercase" as const, letterSpacing: "0.06em" }}>
             Device
           </p>
@@ -137,6 +168,6 @@ export default function ModeSwitch({ mode, deviceId, duration, onModeChange, onD
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
