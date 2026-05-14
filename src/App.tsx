@@ -12,7 +12,7 @@ export default function App() {
       overflow: "visible",
     }}>
       <Header />
-      <div style={{ padding: "4px 12px 10px", overflow: "visible" }}>
+      <div style={{ padding: "4px 12px 4px", overflow: "visible" }}>
         <InputBox />
       </div>
     </div>
