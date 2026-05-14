@@ -15,7 +15,7 @@ export default function Header() {
       }}>
         <span style={{
           fontFamily: "var(--font-serif)", fontWeight: 400,
-          fontSize: 16, color: "var(--text)", letterSpacing: "0.04em",
+          fontSize: 16, color: "var(--text)", letterSpacing: "0.02em",
         }}>
           inklet
         </span>
