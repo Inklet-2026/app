@@ -33,6 +33,7 @@ export default function InputBox() {
   const [submitting, setSubmitting] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const [attachReady, setAttachReady] = useState(false);
   const prevAttachCount = useRef(0);
   useEffect(() => {
     let h = H_BASE;
@@ -40,9 +41,13 @@ export default function InputBox() {
     if (dropdownOpen) h += H_DROPDOWN;
     const growing = attachments.length > prevAttachCount.current;
     prevAttachCount.current = attachments.length;
+
     if (growing) {
-      setTimeout(() => (window as any).electronAPI?.resizeWindow(W, h), 30);
+      setAttachReady(false);
+      (window as any).electronAPI?.resizeWindow(W, h);
+      setTimeout(() => setAttachReady(true), 200);
     } else {
+      if (attachments.length === 0) setAttachReady(false);
       (window as any).electronAPI?.resizeWindow(W, h);
     }
   }, [attachments.length, dropdownOpen]);
@@ -199,22 +204,20 @@ export default function InputBox() {
         </div>
       </div>
 
-      {/* Attachments — OUTSIDE the input box, below it, animated expand */}
-      <div style={{
-        maxHeight: attachments.length > 0 ? 80 : 0,
-        overflow: "hidden",
-        transition: "max-height 180ms ease-out",
-      }}>
+      {/* Attachments — OUTSIDE the input box, below it */}
+      {attachments.length > 0 && (
         <div style={{
           paddingTop: 6,
           overflowX: "auto",
           overflowY: "hidden",
           scrollbarWidth: "thin",
           scrollbarColor: "var(--border) transparent",
+          opacity: attachReady ? 1 : 0,
+          transition: "opacity 150ms ease-in",
         }}>
           <AttachmentList attachments={attachments} onRemove={removeAttachment} />
         </div>
-      </div>
+      )}
 
       {showLink && <LinkModal onClose={() => setShowLink(false)} onSubmit={handleLinkSubmit} />}
     </>
