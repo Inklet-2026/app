@@ -10,21 +10,21 @@ const CARD_HEIGHT = 72;
 function ImageCard({ a, onRemove }: { a: Attachment; onRemove: () => void }) {
   return (
     <div style={{
-      flexShrink: 0, height: CARD_HEIGHT,
+      flexShrink: 0, width: CARD_HEIGHT, height: CARD_HEIGHT,
       borderRadius: 12, overflow: "hidden", position: "relative",
       background: "var(--bg-card)", border: "1px solid var(--border)",
-      display: "flex",
+      display: "flex", flexDirection: "column",
     }}>
       <div style={{
-        width: CARD_HEIGHT, height: CARD_HEIGHT, flexShrink: 0,
+        flex: 1, overflow: "hidden",
         backgroundImage: `url(${a.preview})`,
         backgroundSize: "cover", backgroundPosition: "center",
       }} />
       <div style={{
-        padding: "0 10px", display: "flex", alignItems: "center",
-        fontSize: 11, color: "var(--text-secondary)",
-        overflow: "hidden", whiteSpace: "nowrap" as const,
-        textOverflow: "ellipsis", maxWidth: 120,
+        padding: "3px 6px", fontSize: 9, color: "var(--text-muted)",
+        overflow: "hidden", textOverflow: "ellipsis",
+        whiteSpace: "nowrap" as const,
+        borderTop: "1px solid var(--border)",
       }}>
         {a.name}
       </div>
@@ -40,7 +40,7 @@ function LinkCard({ a, onRemove }: { a: Attachment; onRemove: () => void }) {
       flexShrink: 0, height: CARD_HEIGHT,
       borderRadius: 12, overflow: "hidden", position: "relative",
       background: "var(--bg-card)", border: "1px solid var(--border)",
-      display: "flex", maxWidth: 320,
+      display: "flex", width: 220,
     }}>
       {og?.image && (
         <div style={{
@@ -51,12 +51,12 @@ function LinkCard({ a, onRemove }: { a: Attachment; onRemove: () => void }) {
         }} />
       )}
       <div style={{
-        flex: 1, padding: "8px 10px", minWidth: 120,
-        display: "flex", flexDirection: "column", justifyContent: "center", gap: 2,
+        flex: 1, padding: "6px 8px", minWidth: 0,
+        display: "flex", flexDirection: "column", justifyContent: "center", gap: 1,
         overflow: "hidden",
       }}>
         <div style={{
-          fontSize: 12, fontWeight: 500, color: "var(--text)",
+          fontSize: 11, fontWeight: 500, color: "var(--text)",
           overflow: "hidden", textOverflow: "ellipsis",
           whiteSpace: "nowrap" as const,
         }}>
@@ -64,7 +64,7 @@ function LinkCard({ a, onRemove }: { a: Attachment; onRemove: () => void }) {
         </div>
         {og?.description && (
           <div style={{
-            fontSize: 10, color: "var(--text-muted)", lineHeight: 1.3,
+            fontSize: 9, color: "var(--text-muted)", lineHeight: 1.3,
             overflow: "hidden", textOverflow: "ellipsis",
             whiteSpace: "nowrap" as const,
           }}>
@@ -72,9 +72,7 @@ function LinkCard({ a, onRemove }: { a: Attachment; onRemove: () => void }) {
           </div>
         )}
         <div style={{
-          fontSize: 10, color: "var(--text-muted)", opacity: 0.7,
-          overflow: "hidden", textOverflow: "ellipsis",
-          whiteSpace: "nowrap" as const,
+          fontSize: 9, color: "var(--text-muted)", opacity: 0.6,
         }}>
           {og?.hostname || a.name}
         </div>

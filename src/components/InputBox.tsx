@@ -10,7 +10,7 @@ function genId() {
 
 const W = 500;
 const H_BASE = 177;
-const H_ATTACHMENTS = 93;
+const H_ATTACHMENTS = 82;
 const H_DROPDOWN = 200;
 
 const toolBtn: React.CSSProperties = {
