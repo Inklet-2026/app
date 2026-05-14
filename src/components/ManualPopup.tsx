@@ -64,7 +64,7 @@ export default function ManualPopup() {
           onClick={() => handleDeviceClick(d.id)}
           style={{
             display: "block", width: "100%", textAlign: "left",
-            background: deviceId === d.id ? "var(--bg-card)" : "none",
+            background: deviceId === d.id ? "var(--bg-input)" : "none",
             border: "none", cursor: "pointer",
             padding: "6px 8px", fontSize: 12, borderRadius: 6,
             color: "var(--text)", fontFamily: "var(--font-sans)",

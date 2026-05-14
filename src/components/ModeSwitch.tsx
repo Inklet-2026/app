@@ -67,7 +67,7 @@ export default function ModeSwitch({ mode, deviceId, duration, onModeChange, onD
         border: "1px solid var(--border)",
       }}>
         <button
-          onClick={() => { onModeChange("auto"); (window as any).electronAPI?.closeManualPopup(); }}
+          onClick={() => { onModeChange("auto"); onDeviceChange(""); onDurationChange(""); (window as any).electronAPI?.closeManualPopup(); }}
           style={{
             ...pill,
             background: mode === "auto" ? "var(--accent)" : "transparent",

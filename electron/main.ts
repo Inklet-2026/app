@@ -42,7 +42,7 @@ ipcMain.on("show-manual-popup", (_e, { x, y, deviceId, duration }: { x: number; 
 
   const display = screen.getDisplayNearestPoint({ x, y });
   const popupWidth = 200;
-  const popupHeight = 220;
+  const popupHeight = 240;
   let px = Math.round(x - popupWidth);
   let py = Math.round(y + 8);
   if (py + popupHeight > display.workArea.y + display.workArea.height) {
