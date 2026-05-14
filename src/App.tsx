@@ -1,22 +1,35 @@
+import { useEffect } from "react";
 import { useAppStore } from "./stores/appStore";
 import { useTauriWindow } from "./hooks/useTauriWindow";
+import { useDeviceStore } from "./stores/deviceStore";
 import InputBar from "./components/InputBar";
 import PushModeSelector from "./components/PushModeSelector";
 import StatusIndicator from "./components/StatusIndicator";
 import BottomNav from "./components/BottomNav";
+import HomeView from "./views/HomeView";
+import HistoryView from "./views/HistoryView";
+import DevicesView from "./views/DevicesView";
+import SourcesView from "./views/SourcesView";
+import SettingsView from "./views/SettingsView";
 
 function ViewContent() {
   const activeTab = useAppStore((s) => s.activeTab);
-  return (
-    <div className="flex-1 overflow-y-auto px-4 py-3">
-      <p className="text-sm text-gray-400">{activeTab} view</p>
-    </div>
-  );
+  switch (activeTab) {
+    case "home": return <HomeView />;
+    case "history": return <HistoryView />;
+    case "devices": return <DevicesView />;
+    case "sources": return <SourcesView />;
+    case "settings": return <SettingsView />;
+  }
 }
 
 export default function App() {
   const mode = useAppStore((s) => s.mode);
+  const fetchDevices = useDeviceStore((s) => s.fetchDevices);
+
   useTauriWindow();
+
+  useEffect(() => { fetchDevices(); }, [fetchDevices]);
 
   return (
     <div
@@ -46,7 +59,9 @@ export default function App() {
 
       {mode === "expanded" && (
         <>
-          <ViewContent />
+          <div className="flex-1 overflow-y-auto px-4 py-3">
+            <ViewContent />
+          </div>
           <BottomNav />
         </>
       )}
