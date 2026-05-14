@@ -11,7 +11,7 @@ function ImageCard({ a, onRemove }: { a: Attachment; onRemove: () => void }) {
   return (
     <div style={{
       flexShrink: 0, width: CARD_HEIGHT, height: CARD_HEIGHT,
-      borderRadius: 8, overflow: "hidden", position: "relative",
+      borderRadius: 12, overflow: "hidden", position: "relative",
       background: "var(--bg-card)", border: "1px solid var(--border)",
     }}>
       <div style={{
@@ -29,7 +29,7 @@ function LinkCard({ a, onRemove }: { a: Attachment; onRemove: () => void }) {
   return (
     <div style={{
       flexShrink: 0, height: CARD_HEIGHT,
-      borderRadius: 8, overflow: "hidden", position: "relative",
+      borderRadius: 12, overflow: "hidden", position: "relative",
       background: "var(--bg-card)", border: "1px solid var(--border)",
       display: "flex", maxWidth: 320,
     }}>
@@ -94,7 +94,7 @@ export default function AttachmentList({ attachments, onRemove }: Props) {
   return (
     <div style={{
       display: "flex", gap: 8,
-      padding: "0 2px",
+      padding: 0,
       overflowX: "auto", overflowY: "hidden",
       flexWrap: "nowrap", scrollbarWidth: "none",
     }}>
