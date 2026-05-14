@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from "react";
 import type { Attachment } from "../types";
 
 interface Props {
@@ -8,45 +7,10 @@ interface Props {
 
 const CARD_HEIGHT = 72;
 
-function AnimatedCard({ children, onRemove, isNew }: { children: React.ReactNode; onRemove: () => void; isNew: boolean }) {
-  const [state, setState] = useState<"entering" | "visible" | "exiting">(isNew ? "entering" : "visible");
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [cardWidth, setCardWidth] = useState<number | undefined>(undefined);
-
-  useEffect(() => {
-    if (state === "entering") {
-      requestAnimationFrame(() => setState("visible"));
-    }
-  }, [state]);
-
-  function handleRemove() {
-    if (cardRef.current) setCardWidth(cardRef.current.offsetWidth);
-    setState("exiting");
-    setTimeout(onRemove, 200);
-  }
-
-  return (
-    <div
-      ref={cardRef}
-      style={{
-        opacity: state === "exiting" ? 0 : state === "entering" ? 0 : 1,
-        transform: state === "entering" ? "scale(0.95)" : state === "exiting" ? "scale(0.95)" : "scale(1)",
-        width: state === "exiting" ? 0 : cardWidth ?? undefined,
-        marginRight: state === "exiting" ? -8 : 0,
-        transition: "opacity 150ms ease, transform 150ms ease, width 200ms ease, margin 200ms ease",
-        flexShrink: 0,
-        overflow: "hidden",
-      }}
-    >
-      {typeof children === "function" ? (children as any)(handleRemove) : children}
-    </div>
-  );
-}
-
-function ImageCard({ a, onAnimatedRemove }: { a: Attachment; onAnimatedRemove: () => void }) {
+function ImageCard({ a, onRemove }: { a: Attachment; onRemove: () => void }) {
   return (
     <div style={{
-      width: CARD_HEIGHT, height: CARD_HEIGHT,
+      flexShrink: 0, width: CARD_HEIGHT, height: CARD_HEIGHT,
       borderRadius: 12, overflow: "hidden", position: "relative",
       background: "var(--bg-card)", border: "1px solid var(--border)",
       display: "flex", flexDirection: "column",
@@ -64,16 +28,16 @@ function ImageCard({ a, onAnimatedRemove }: { a: Attachment; onAnimatedRemove: (
       }}>
         {a.name}
       </div>
-      <RemoveBtn onClick={onAnimatedRemove} />
+      <RemoveBtn onClick={onRemove} />
     </div>
   );
 }
 
-function LinkCard({ a, onAnimatedRemove }: { a: Attachment; onAnimatedRemove: () => void }) {
+function LinkCard({ a, onRemove }: { a: Attachment; onRemove: () => void }) {
   const og = a.og;
   return (
     <div style={{
-      height: CARD_HEIGHT,
+      flexShrink: 0, height: CARD_HEIGHT,
       borderRadius: 12, overflow: "hidden", position: "relative",
       background: "var(--bg-card)", border: "1px solid var(--border)",
       display: "flex", width: 220,
@@ -111,7 +75,7 @@ function LinkCard({ a, onAnimatedRemove }: { a: Attachment; onAnimatedRemove: ()
           {og?.hostname || a.name}
         </div>
       </div>
-      <RemoveBtn onClick={onAnimatedRemove} />
+      <RemoveBtn onClick={onRemove} />
     </div>
   );
 }
@@ -130,39 +94,20 @@ function RemoveBtn({ onClick }: { onClick: () => void }) {
 }
 
 export default function AttachmentList({ attachments, onRemove }: Props) {
-  const knownIds = useRef(new Set<string>());
-
-  if (attachments.length === 0) {
-    knownIds.current.clear();
-    return null;
-  }
-
-  const currentIds = new Set(attachments.map((a) => a.id));
-  const newIds = new Set<string>();
-  for (const id of currentIds) {
-    if (!knownIds.current.has(id)) newIds.add(id);
-  }
-  knownIds.current = currentIds;
+  if (attachments.length === 0) return null;
 
   return (
     <div style={{
-      display: "flex", gap: 8,
-      padding: 0,
+      display: "flex", gap: 8, padding: 0,
       overflowX: "auto", overflowY: "hidden",
       flexWrap: "nowrap", scrollbarWidth: "thin",
       scrollbarColor: "var(--border) transparent",
     }}>
-      {attachments.map((a) => (
-        <AnimatedCard key={a.id} isNew={newIds.has(a.id)} onRemove={() => onRemove(a.id)}>
-          {(handleRemove: () => void) =>
-            a.type === "link" ? (
-              <LinkCard a={a} onAnimatedRemove={handleRemove} />
-            ) : (
-              <ImageCard a={a} onAnimatedRemove={handleRemove} />
-            )
-          }
-        </AnimatedCard>
-      ))}
+      {attachments.map((a) =>
+        a.type === "link"
+          ? <LinkCard key={a.id} a={a} onRemove={() => onRemove(a.id)} />
+          : <ImageCard key={a.id} a={a} onRemove={() => onRemove(a.id)} />
+      )}
     </div>
   );
 }

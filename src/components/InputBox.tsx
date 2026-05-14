@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Attachment, OgData } from "../types";
 import AttachmentList from "./AttachmentList";
 import LinkModal from "./LinkModal";
@@ -33,23 +33,11 @@ export default function InputBox() {
   const [submitting, setSubmitting] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const [attachReady, setAttachReady] = useState(false);
-  const prevAttachCount = useRef(0);
   useEffect(() => {
     let h = H_BASE;
     if (attachments.length > 0) h += H_ATTACHMENTS;
     if (dropdownOpen) h += H_DROPDOWN;
-    const wasEmpty = prevAttachCount.current === 0;
-    prevAttachCount.current = attachments.length;
-
-    if (attachments.length > 0 && wasEmpty) {
-      setAttachReady(false);
-      (window as any).electronAPI?.resizeWindow(W, h);
-      setTimeout(() => setAttachReady(true), 200);
-    } else {
-      if (attachments.length === 0) setAttachReady(false);
-      (window as any).electronAPI?.resizeWindow(W, h);
-    }
+    (window as any).electronAPI?.resizeWindow(W, h);
   }, [attachments.length, dropdownOpen]);
 
   function addAttachment(a: Attachment) {
@@ -204,8 +192,8 @@ export default function InputBox() {
         </div>
       </div>
 
-      {/* Attachments — only render after window has expanded */}
-      {attachReady && attachments.length > 0 && (
+      {/* Attachments */}
+      {attachments.length > 0 && (
         <div style={{
           paddingTop: 8,
           overflowX: "auto",
