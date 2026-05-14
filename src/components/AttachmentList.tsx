@@ -10,15 +10,24 @@ const CARD_HEIGHT = 72;
 function ImageCard({ a, onRemove }: { a: Attachment; onRemove: () => void }) {
   return (
     <div style={{
-      flexShrink: 0, width: CARD_HEIGHT, height: CARD_HEIGHT,
+      flexShrink: 0, height: CARD_HEIGHT,
       borderRadius: 12, overflow: "hidden", position: "relative",
       background: "var(--bg-card)", border: "1px solid var(--border)",
+      display: "flex",
     }}>
       <div style={{
-        width: "100%", height: "100%",
+        width: CARD_HEIGHT, height: CARD_HEIGHT, flexShrink: 0,
         backgroundImage: `url(${a.preview})`,
         backgroundSize: "cover", backgroundPosition: "center",
       }} />
+      <div style={{
+        padding: "0 10px", display: "flex", alignItems: "center",
+        fontSize: 11, color: "var(--text-secondary)",
+        overflow: "hidden", whiteSpace: "nowrap" as const,
+        textOverflow: "ellipsis", maxWidth: 120,
+      }}>
+        {a.name}
+      </div>
       <RemoveBtn onClick={onRemove} />
     </div>
   );
