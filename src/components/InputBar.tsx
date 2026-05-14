@@ -139,12 +139,13 @@ export default function InputBar() {
       <div
         onClick={handleClick}
         style={{
-          background: "var(--bg-input)",
-          border: "1px solid var(--border)",
-          borderRadius: 12,
+          background: mode === "mini" ? "var(--bg)" : "var(--bg-input)",
+          border: mode === "mini" ? "none" : "1px solid var(--border)",
+          borderRadius: mode === "mini" ? 0 : 12,
           display: "flex",
           flexDirection: "column",
           cursor: mode === "mini" ? "text" : undefined,
+          height: mode === "mini" ? "100%" : undefined,
         }}
       >
         {/* Text area */}

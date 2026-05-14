@@ -19,7 +19,7 @@ html, body, #root {
   padding: 0;
   height: 100%;
   overflow: hidden;
-  background: var(--bg);
+  background: transparent;
 }
 
 body {
@@ -32,21 +32,23 @@ body {
   line-height: 1.5;
 }
 
+[data-tauri-drag-region] {
+  -webkit-app-region: drag;
+}
+
+button, a, input, textarea, select {
+  -webkit-app-region: no-drag;
+}
+
 textarea, input, select {
   font-family: var(--font-sans);
 }
 
 .expanded-content-enter {
-  animation: slideDown 250ms ease-out forwards;
+  animation: slideDown 200ms ease-out forwards;
 }
 
 @keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
 }

@@ -5,15 +5,32 @@ use tauri::{
 };
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 
+const MINI_WIDTH: f64 = 480.0;
+const MINI_HEIGHT: f64 = 100.0;
+const EXPANDED_WIDTH: f64 = 480.0;
+const EXPANDED_HEIGHT: f64 = 580.0;
+const HEADER_HEIGHT: f64 = 52.0;
+
 #[tauri::command]
 fn set_window_mode(window: tauri::WebviewWindow, mode: &str) -> Result<(), String> {
+    let e = |err: tauri::Error| err.to_string();
     match mode {
         "mini" => {
-            window.set_size(tauri::LogicalSize::new(480.0, 140.0)).map_err(|e| e.to_string())?;
-            window.set_always_on_top(true).map_err(|e| e.to_string())?;
+            let pos = window.outer_position().map_err(e)?;
+            let scale = window.scale_factor().unwrap_or(2.0);
+            let offset = (HEADER_HEIGHT * scale) as i32;
+            window.set_decorations(false).map_err(e)?;
+            window.set_size(tauri::LogicalSize::new(MINI_WIDTH, MINI_HEIGHT)).map_err(e)?;
+            window.set_position(tauri::PhysicalPosition::new(pos.x, pos.y + offset)).map_err(e)?;
+            window.set_always_on_top(true).map_err(e)?;
         }
         "expanded" => {
-            window.set_size(tauri::LogicalSize::new(480.0, 560.0)).map_err(|e| e.to_string())?;
+            let pos = window.outer_position().map_err(e)?;
+            let scale = window.scale_factor().unwrap_or(2.0);
+            let offset = (HEADER_HEIGHT * scale) as i32;
+            window.set_size(tauri::LogicalSize::new(EXPANDED_WIDTH, EXPANDED_HEIGHT)).map_err(e)?;
+            window.set_position(tauri::PhysicalPosition::new(pos.x, pos.y - offset)).map_err(e)?;
+            window.set_decorations(true).map_err(e)?;
         }
         _ => return Err(format!("Invalid mode: {mode}")),
     }

@@ -14,14 +14,13 @@
         "label": "main",
         "title": "Inklet Portal",
         "width": 480,
-        "height": 140,
+        "height": 100,
         "decorations": false,
         "transparent": true,
         "alwaysOnTop": true,
         "center": true,
         "visible": true,
-        "resizable": false,
-        "shadow": true
+        "resizable": false
       }
     ],
     "security": { "csp": null }
