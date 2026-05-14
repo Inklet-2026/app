@@ -18,7 +18,7 @@ function createWindow() {
     fullscreenable: false,
     backgroundColor: "#F5F3ED",
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+      preload: path.join(__dirname, "preload.mjs"),
       contextIsolation: true,
       nodeIntegration: false,
     },
