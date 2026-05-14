@@ -8,8 +8,8 @@ function genId() {
   return Math.random().toString(36).slice(2);
 }
 
-const WINDOW_BASE = 200;
-const WINDOW_WITH_ATTACHMENTS = 300;
+const WINDOW_BASE = 185;
+const WINDOW_WITH_ATTACHMENTS = 285;
 
 const toolBtn: React.CSSProperties = {
   width: 30, height: 30, borderRadius: 8,

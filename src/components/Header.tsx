@@ -3,7 +3,7 @@ export default function Header() {
     <div style={{
       display: "flex",
       alignItems: "center",
-      height: 42,
+      height: 36,
       padding: "0 16px 0 76px",
       position: "relative",
     }}>

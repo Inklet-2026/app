@@ -9,9 +9,9 @@ let win: BrowserWindow | null = null;
 function createWindow() {
   win = new BrowserWindow({
     width: 500,
-    height: 200,
+    height: 185,
     titleBarStyle: "hiddenInset",
-    trafficLightPosition: { x: 14, y: 14 },
+    trafficLightPosition: { x: 14, y: 12 },
     alwaysOnTop: true,
     resizable: false,
     maximizable: false,

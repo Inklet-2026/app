@@ -8,11 +8,11 @@ export default function App() {
       display: "flex",
       flexDirection: "column",
       background: "var(--bg)",
-      paddingTop: 6,
+      paddingTop: 2,
       overflow: "visible",
     }}>
       <Header />
-      <div style={{ padding: "4px 12px 4px", overflow: "visible" }}>
+      <div style={{ padding: "0px 12px 2px", overflow: "visible" }}>
         <InputBox />
       </div>
     </div>

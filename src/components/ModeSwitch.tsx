@@ -54,9 +54,9 @@ export default function ModeSwitch({ mode, deviceId, duration, onModeChange, onD
   useEffect(() => {
     if (open) {
       updatePos();
-      (window as any).electronAPI?.resizeWindow(500, 460);
+      (window as any).electronAPI?.resizeWindow(500, 450);
     } else {
-      (window as any).electronAPI?.resizeWindow(500, 200);
+      (window as any).electronAPI?.resizeWindow(500, 185);
     }
   }, [open, updatePos]);
 
