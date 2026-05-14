@@ -25,16 +25,20 @@ export default function ManualPopup() {
     setDeviceId(did);
   }
 
-  function handleDuration(d: string) {
-    setDuration(d);
-    if (deviceId) {
-      (window as any).electronAPI?.sendManualSelection(deviceId, d);
+  function trySend(did: string, dur: string) {
+    if (did && dur) {
+      (window as any).electronAPI?.sendManualSelection(did, dur);
     }
   }
 
   function handleDeviceClick(did: string) {
-    handleSelect(did);
-    (window as any).electronAPI?.sendManualSelection(did, duration);
+    setDeviceId(did);
+    trySend(did, duration);
+  }
+
+  function handleDuration(d: string) {
+    setDuration(d);
+    trySend(deviceId, d);
   }
 
   return (

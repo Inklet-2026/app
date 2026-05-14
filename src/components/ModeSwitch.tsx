@@ -85,14 +85,15 @@ export default function ModeSwitch({ mode, deviceId, duration, onModeChange, onD
             display: "flex", alignItems: "center", gap: 3,
           }}
         >
-          {mode === "manual" && deviceId
-            ? MOCK_DEVICES.find((d) => d.id === deviceId)?.name ?? "Manual"
-            : "Manual"}
-          {mode === "manual" && (
-            <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-              <path d="M2 3l2 2 2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          )}
+          {mode === "manual" && deviceId ? (
+            <>
+              <span>{MOCK_DEVICES.find((d) => d.id === deviceId)?.name}</span>
+              {duration && <span style={{ opacity: 0.5, fontWeight: 400 }}>{duration}</span>}
+            </>
+          ) : "Manual"}
+          <svg width="8" height="8" viewBox="0 0 8 8" fill="none" style={{ opacity: mode === "manual" ? 1 : 0.5 }}>
+            <path d="M2 3l2 2 2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
         </button>
       </div>
     </div>
