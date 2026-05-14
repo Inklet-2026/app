@@ -33,11 +33,25 @@ export default function InputBox() {
   const [submitting, setSubmitting] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const [attachReady, setAttachReady] = useState(false);
+  const prevAttachCount = useRef(0);
   useEffect(() => {
     let h = H_BASE;
     if (attachments.length > 0) h += H_ATTACHMENTS;
     if (dropdownOpen) h += H_DROPDOWN;
+    const wasEmpty = prevAttachCount.current === 0;
+    prevAttachCount.current = attachments.length;
+
     (window as any).electronAPI?.resizeWindow(W, h);
+
+    if (attachments.length === 0) {
+      setAttachReady(false);
+    } else if (wasEmpty) {
+      setAttachReady(false);
+      setTimeout(() => setAttachReady(true), 200);
+    } else {
+      setAttachReady(true);
+    }
   }, [attachments.length, dropdownOpen]);
 
   function addAttachment(a: Attachment) {
@@ -192,8 +206,8 @@ export default function InputBox() {
         </div>
       </div>
 
-      {/* Attachments */}
-      {attachments.length > 0 && (
+      {/* Attachments — wait for window resize on first add */}
+      {attachReady && attachments.length > 0 && (
         <div style={{
           paddingTop: 8,
           overflowX: "auto",
