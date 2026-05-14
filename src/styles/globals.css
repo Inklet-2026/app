@@ -9,9 +9,12 @@
   --text-secondary: #666666;
   --text-muted: #999999;
   --accent: #1A1A1A;
-  --radius: 12px;
   --font-serif: "Newsreader", Georgia, serif;
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 html, body, #root {
@@ -19,36 +22,23 @@ html, body, #root {
   padding: 0;
   height: 100%;
   overflow: hidden;
-  background: transparent;
+  background: var(--bg);
 }
 
 body {
   font-family: var(--font-sans);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  user-select: none;
   font-size: 14px;
   line-height: 1.5;
-}
-
-[data-tauri-drag-region] {
+  user-select: none;
   -webkit-app-region: drag;
 }
 
-button, a, input, textarea, select {
+button, a, input, textarea, select, label {
   -webkit-app-region: no-drag;
 }
 
 textarea, input, select {
   font-family: var(--font-sans);
-}
-
-.expanded-content-enter {
-  animation: slideDown 200ms ease-out forwards;
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
 }

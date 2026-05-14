@@ -7,139 +7,68 @@ interface Props {
 
 export default function LinkModal({ onClose, onSubmit }: Props) {
   const [url, setUrl] = useState("https://");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const ref = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { ref.current?.focus(); ref.current?.select(); }, []);
 
   useEffect(() => {
-    inputRef.current?.focus();
-    inputRef.current?.setSelectionRange(url.length, url.length);
-  }, []);
-
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
   function handleSubmit() {
-    const trimmed = url.trim();
-    if (!trimmed || trimmed === "https://") return;
     try {
-      const hostname = new URL(trimmed).hostname;
-      onSubmit(trimmed, hostname);
+      const hostname = new URL(url).hostname;
+      onSubmit(url, hostname);
     } catch {
-      // Invalid URL — use raw input as hostname fallback
-      onSubmit(trimmed, trimmed);
-    }
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSubmit();
+      /* invalid URL */
     }
   }
 
   return (
-    <>
-      {/* Backdrop */}
+    <div style={{
+      position: "fixed", inset: 0, display: "flex",
+      alignItems: "center", justifyContent: "center",
+      background: "rgba(0,0,0,0.08)", zIndex: 100,
+    }} onClick={onClose}>
       <div
-        onClick={onClose}
+        onClick={(e) => e.stopPropagation()}
         style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 100,
-        }}
-      />
-
-      {/* Modal */}
-      <div
-        style={{
-          position: "fixed",
-          bottom: 80,
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 101,
-          background: "var(--bg)",
+          background: "var(--bg)", borderRadius: 12,
+          padding: "16px 18px", width: 340,
+          boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
           border: "1px solid var(--border)",
-          borderRadius: 12,
-          padding: 16,
-          width: 300,
-          boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
         }}
       >
-        <p
-          style={{
-            margin: "0 0 10px",
-            fontSize: 13,
-            fontWeight: 500,
-            color: "var(--text)",
-          }}
-        >
-          Enter URL
+        <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px", color: "var(--text)" }}>
+          Add link
         </p>
-
         <input
-          ref={inputRef}
+          ref={ref}
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
           style={{
-            width: "100%",
-            boxSizing: "border-box",
-            background: "var(--bg-input)",
-            border: "1px solid var(--border)",
-            borderRadius: 8,
-            padding: "8px 10px",
-            fontSize: 13,
+            width: "100%", fontSize: 13, padding: "8px 10px",
+            borderRadius: 8, border: "1px solid var(--border)",
+            background: "var(--bg-input)", outline: "none",
             color: "var(--text)",
-            outline: "none",
-            fontFamily: "var(--font-sans)",
           }}
         />
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: 8,
-            marginTop: 12,
-          }}
-        >
-          <button
-            onClick={onClose}
-            style={{
-              padding: "6px 14px",
-              borderRadius: 7,
-              border: "1px solid var(--border)",
-              background: "transparent",
-              color: "var(--text-secondary)",
-              fontSize: 13,
-              cursor: "pointer",
-              fontFamily: "var(--font-sans)",
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            style={{
-              padding: "6px 14px",
-              borderRadius: 7,
-              border: "none",
-              background: "var(--accent)",
-              color: "var(--bg)",
-              fontSize: 13,
-              cursor: "pointer",
-              fontFamily: "var(--font-sans)",
-              fontWeight: 500,
-            }}
-          >
-            Fetch
-          </button>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
+          <button onClick={onClose} style={{
+            background: "none", border: "none", cursor: "pointer",
+            fontSize: 12, color: "var(--text-muted)", padding: "6px 12px",
+          }}>Cancel</button>
+          <button onClick={handleSubmit} style={{
+            background: "var(--accent)", color: "var(--bg)",
+            border: "none", cursor: "pointer",
+            fontSize: 12, fontWeight: 500, padding: "6px 14px",
+            borderRadius: 6,
+          }}>Fetch</button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
