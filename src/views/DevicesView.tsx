@@ -18,23 +18,27 @@ export default function DevicesView() {
 
   useEffect(() => { fetchDevices(); }, [fetchDevices]);
 
-  if (isLoading) return <p className="text-xs text-gray-400 text-center py-4">Loading...</p>;
+  if (isLoading) return <p className="text-xs text-center py-4" style={{ color: "var(--text-muted)" }}>Loading...</p>;
 
   return (
     <div className="flex flex-col gap-2">
       {devices.map((d) => {
         const remaining = remainingTime(d.manualUntil);
         return (
-          <div key={d.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-            <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${d.status === "online" ? "bg-green-400" : "bg-gray-300"}`} />
+          <div key={d.id} className="flex items-center gap-3 p-3 rounded-lg"
+            style={{ background: "var(--bg-card)", borderRadius: 8 }}>
+            <div
+              className="w-2.5 h-2.5 rounded-full shrink-0"
+              style={{ background: d.status === "online" ? "#28C840" : "var(--border)" }}
+            />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-800">{d.name}</p>
-              <p className="text-[11px] text-gray-400 truncate">
+              <p className="text-sm font-medium" style={{ color: "var(--text)" }}>{d.name}</p>
+              <p className="text-[11px] truncate" style={{ color: "var(--text-muted)" }}>
                 {d.currentContent ?? "No content"}
-                {remaining && <span className="text-amber-500 ml-1">(manual: {remaining})</span>}
+                {remaining && <span className="ml-1" style={{ color: "#B8860B" }}>(manual: {remaining})</span>}
               </p>
             </div>
-            <span className="text-[10px] text-gray-400">{d.status}</span>
+            <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>{d.status}</span>
           </div>
         );
       })}
