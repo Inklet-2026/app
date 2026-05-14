@@ -1,0 +1,29 @@
+{
+  "productName": "Inklet Portal",
+  "version": "0.1.0",
+  "identifier": "com.inklet.portal",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "pnpm dev",
+    "beforeBuildCommand": "pnpm build"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Inklet Portal",
+        "width": 400,
+        "height": 56,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "center": true,
+        "visible": false,
+        "resizable": false,
+        "shadow": false
+      }
+    ],
+    "security": { "csp": null }
+  }
+}
