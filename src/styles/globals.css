@@ -52,3 +52,13 @@ textarea, input, select {
   from { opacity: 0; transform: scale(0.97) translateY(4px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes checkPop {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}

@@ -46,6 +46,7 @@ export default function InputBox() {
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [duration, setDuration] = useState("1h");
   const [submitting, setSubmitting] = useState(false);
+  const [submitState, setSubmitState] = useState<"idle" | "loading" | "success">("idle");
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const [attachReady, setAttachReady] = useState(false);
@@ -79,10 +80,13 @@ export default function InputBox() {
   async function handleSubmit() {
     if (!content.trim() && attachments.length === 0) return;
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 500));
+    setSubmitState("loading");
+    await new Promise((r) => setTimeout(r, 800));
     setContent("");
     setAttachments([]);
     setSubmitting(false);
+    setSubmitState("success");
+    setTimeout(() => setSubmitState("idle"), 1200);
   }
 
   async function handleClipboard() {
@@ -203,19 +207,33 @@ export default function InputBox() {
             <ModeSwitch mode={mode} deviceId={deviceId} duration={duration} open={dropdownOpen} onModeChange={setMode} onDeviceChange={setDeviceId} onDurationChange={setDuration} onOpenChange={setDropdownOpen} />
             <button
               onClick={handleSubmit}
-              disabled={!canSubmit}
+              disabled={!canSubmit || submitState !== "idle"}
               style={{
                 width: 30, height: 30, borderRadius: 8,
-                background: "var(--accent)", border: "none",
+                background: submitState === "success" ? "#34A853" : "var(--accent)",
+                border: "none",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                color: "var(--bg)", cursor: canSubmit ? "pointer" : "default",
-                opacity: canSubmit ? 1 : 0.25,
-                transition: "opacity 150ms", flexShrink: 0,
+                color: submitState === "success" ? "white" : "var(--bg)",
+                cursor: canSubmit && submitState === "idle" ? "pointer" : "default",
+                opacity: canSubmit || submitState !== "idle" ? 1 : 0.25,
+                transition: "background 200ms, opacity 150ms",
+                flexShrink: 0,
               }}
             >
-              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                <path d="M6.5 11V2M3.5 5L6.5 2l3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              {submitState === "loading" ? (
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ animation: "spin 600ms linear infinite" }}>
+                  <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" opacity="0.25"/>
+                  <path d="M12.5 7a5.5 5.5 0 0 0-5.5-5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              ) : submitState === "success" ? (
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ animation: "checkPop 300ms ease-out" }}>
+                  <path d="M3 7.5l3 3 5-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ) : (
+                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                  <path d="M6.5 11V2M3.5 5L6.5 2l3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              )}
             </button>
           </div>
         </div>
