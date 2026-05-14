@@ -9,7 +9,7 @@ let win: BrowserWindow | null = null;
 function createWindow() {
   win = new BrowserWindow({
     width: 500,
-    height: 240,
+    height: 200,
     titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 14, y: 14 },
     alwaysOnTop: true,

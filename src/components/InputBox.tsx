@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import type { Attachment } from "../types";
 import AttachmentList from "./AttachmentList";
 import LinkModal from "./LinkModal";
@@ -7,6 +7,9 @@ import ModeSwitch from "./ModeSwitch";
 function genId() {
   return Math.random().toString(36).slice(2);
 }
+
+const WINDOW_BASE = 200;
+const WINDOW_WITH_ATTACHMENTS = 300;
 
 const toolBtn: React.CSSProperties = {
   width: 30, height: 30, borderRadius: 8,
@@ -26,6 +29,11 @@ export default function InputBox() {
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [duration, setDuration] = useState("1h");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const h = attachments.length > 0 ? WINDOW_WITH_ATTACHMENTS : WINDOW_BASE;
+    (window as any).electronAPI?.resizeWindow(500, h);
+  }, [attachments.length]);
 
   function addAttachment(a: Attachment) {
     setAttachments((prev) => [...prev, a]);
@@ -72,8 +80,7 @@ export default function InputBox() {
     const file = e.target.files?.[0];
     if (!file) return;
     addAttachment({
-      id: genId(), type: "image",
-      name: file.name,
+      id: genId(), type: "image", name: file.name,
       preview: URL.createObjectURL(file),
     });
     e.target.value = "";
@@ -105,13 +112,13 @@ export default function InputBox() {
 
   return (
     <>
+      {/* Input box — fixed size, no attachments inside */}
       <div style={{
         background: "var(--bg-input)", border: "1px solid var(--border)",
         borderRadius: 12, display: "flex", flexDirection: "column",
-        height: 150, flex: "0 0 150px", overflow: "hidden",
+        flexShrink: 0,
       }}>
-        {/* Textarea — shrinks when attachments are present */}
-        <div style={{ padding: "12px 14px 0", flex: 1, minHeight: 0, overflow: "hidden" }}>
+        <div style={{ padding: "12px 14px 0", minHeight: 0 }}>
           <textarea
             ref={textareaRef}
             value={content}
@@ -119,9 +126,9 @@ export default function InputBox() {
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); }}}
             onPaste={handlePaste}
             placeholder="Push content to device..."
-            rows={2}
+            rows={3}
             style={{
-              width: "100%", height: "100%", background: "transparent",
+              width: "100%", background: "transparent",
               border: "none", outline: "none", resize: "none",
               fontSize: 14, lineHeight: 1.5, color: "var(--text)",
               padding: 0, margin: 0,
@@ -129,16 +136,11 @@ export default function InputBox() {
           />
         </div>
 
-        {/* Attachments — fixed height row, scrolls horizontally */}
-        <AttachmentList attachments={attachments} onRemove={removeAttachment} />
-
-        {/* Toolbar */}
         <div style={{
           padding: "6px 10px 8px",
           display: "flex", alignItems: "center", justifyContent: "space-between",
           flexShrink: 0,
         }}>
-          {/* Left tools */}
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <button style={toolBtn} onClick={() => fileRef.current?.click()} title="Upload image">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -163,10 +165,8 @@ export default function InputBox() {
             </button>
           </div>
 
-          {/* Right: mode + submit */}
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <ModeSwitch mode={mode} deviceId={deviceId} duration={duration} onModeChange={setMode} onDeviceChange={setDeviceId} onDurationChange={setDuration} />
-
             <button
               onClick={handleSubmit}
               disabled={!canSubmit}
@@ -184,6 +184,17 @@ export default function InputBox() {
               </svg>
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Attachments — OUTSIDE the input box, below it, animated expand */}
+      <div style={{
+        maxHeight: attachments.length > 0 ? 90 : 0,
+        overflow: "hidden",
+        transition: "max-height 200ms ease-out",
+      }}>
+        <div style={{ paddingTop: 8 }}>
+          <AttachmentList attachments={attachments} onRemove={removeAttachment} />
         </div>
       </div>
 
