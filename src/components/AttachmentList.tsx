@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Attachment } from "../types";
 
 interface Props {
@@ -8,26 +8,36 @@ interface Props {
 
 const CARD_HEIGHT = 72;
 
-function AnimatedCard({ children, onRemove }: { children: React.ReactNode; onRemove: () => void }) {
-  const [state, setState] = useState<"entering" | "visible" | "exiting">("entering");
+function AnimatedCard({ children, onRemove, isNew }: { children: React.ReactNode; onRemove: () => void; isNew: boolean }) {
+  const [state, setState] = useState<"entering" | "visible" | "exiting">(isNew ? "entering" : "visible");
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [cardWidth, setCardWidth] = useState<number | undefined>(undefined);
 
   useEffect(() => {
-    const t = requestAnimationFrame(() => setState("visible"));
-    return () => cancelAnimationFrame(t);
-  }, []);
+    if (state === "entering") {
+      requestAnimationFrame(() => setState("visible"));
+    }
+  }, [state]);
 
   function handleRemove() {
+    if (cardRef.current) setCardWidth(cardRef.current.offsetWidth);
     setState("exiting");
-    setTimeout(onRemove, 150);
+    setTimeout(onRemove, 200);
   }
 
   return (
-    <div style={{
-      opacity: state === "visible" ? 1 : 0,
-      transform: state === "entering" ? "scale(0.95)" : state === "exiting" ? "scale(0.95)" : "scale(1)",
-      transition: "opacity 150ms ease, transform 150ms ease",
-      flexShrink: 0,
-    }}>
+    <div
+      ref={cardRef}
+      style={{
+        opacity: state === "exiting" ? 0 : state === "entering" ? 0 : 1,
+        transform: state === "entering" ? "scale(0.95)" : state === "exiting" ? "scale(0.95)" : "scale(1)",
+        width: state === "exiting" ? 0 : cardWidth ?? undefined,
+        marginRight: state === "exiting" ? -8 : 0,
+        transition: "opacity 150ms ease, transform 150ms ease, width 200ms ease, margin 200ms ease",
+        flexShrink: 0,
+        overflow: "hidden",
+      }}
+    >
       {typeof children === "function" ? (children as any)(handleRemove) : children}
     </div>
   );
@@ -120,7 +130,19 @@ function RemoveBtn({ onClick }: { onClick: () => void }) {
 }
 
 export default function AttachmentList({ attachments, onRemove }: Props) {
-  if (attachments.length === 0) return null;
+  const knownIds = useRef(new Set<string>());
+
+  if (attachments.length === 0) {
+    knownIds.current.clear();
+    return null;
+  }
+
+  const currentIds = new Set(attachments.map((a) => a.id));
+  const newIds = new Set<string>();
+  for (const id of currentIds) {
+    if (!knownIds.current.has(id)) newIds.add(id);
+  }
+  knownIds.current = currentIds;
 
   return (
     <div style={{
@@ -131,7 +153,7 @@ export default function AttachmentList({ attachments, onRemove }: Props) {
       scrollbarColor: "var(--border) transparent",
     }}>
       {attachments.map((a) => (
-        <AnimatedCard key={a.id} onRemove={() => onRemove(a.id)}>
+        <AnimatedCard key={a.id} isNew={newIds.has(a.id)} onRemove={() => onRemove(a.id)}>
           {(handleRemove: () => void) =>
             a.type === "link" ? (
               <LinkCard a={a} onAnimatedRemove={handleRemove} />

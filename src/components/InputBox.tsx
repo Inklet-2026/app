@@ -39,10 +39,10 @@ export default function InputBox() {
     let h = H_BASE;
     if (attachments.length > 0) h += H_ATTACHMENTS;
     if (dropdownOpen) h += H_DROPDOWN;
-    const growing = attachments.length > prevAttachCount.current;
+    const wasEmpty = prevAttachCount.current === 0;
     prevAttachCount.current = attachments.length;
 
-    if (growing) {
+    if (attachments.length > 0 && wasEmpty) {
       setAttachReady(false);
       (window as any).electronAPI?.resizeWindow(W, h);
       setTimeout(() => setAttachReady(true), 200);
