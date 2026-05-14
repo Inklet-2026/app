@@ -1,7 +1,12 @@
 import Header from "./components/Header";
 import InputBox from "./components/InputBox";
+import ManualPopup from "./components/ManualPopup";
 
 export default function App() {
+  const isPopup = window.location.search.includes("popup=manual");
+
+  if (isPopup) return <ManualPopup />;
+
   return (
     <div style={{
       height: "100vh",

@@ -9,9 +9,8 @@ function genId() {
 }
 
 const W = 500;
-const H_BASE = 177;
+const H_BASE = 179;
 const H_ATTACHMENTS = 80;
-const H_DROPDOWN = 200;
 
 const TOOL_SIZE = 30;
 
@@ -47,14 +46,12 @@ export default function InputBox() {
   const [duration, setDuration] = useState("1h");
   const [submitting, setSubmitting] = useState(false);
   const [submitState, setSubmitState] = useState<"idle" | "loading" | "success">("idle");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const [attachReady, setAttachReady] = useState(false);
   const prevAttachCount = useRef(0);
   useEffect(() => {
     let h = H_BASE;
     if (attachments.length > 0) h += H_ATTACHMENTS;
-    if (dropdownOpen) h += H_DROPDOWN;
     const wasEmpty = prevAttachCount.current === 0;
     prevAttachCount.current = attachments.length;
 
@@ -68,7 +65,7 @@ export default function InputBox() {
     } else {
       setAttachReady(true);
     }
-  }, [attachments.length, dropdownOpen]);
+  }, [attachments.length]);
 
   function addAttachment(a: Attachment) {
     setAttachments((prev) => [...prev, a]);
@@ -204,7 +201,7 @@ export default function InputBox() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <ModeSwitch mode={mode} deviceId={deviceId} duration={duration} open={dropdownOpen} onModeChange={setMode} onDeviceChange={setDeviceId} onDurationChange={setDuration} onOpenChange={setDropdownOpen} />
+            <ModeSwitch mode={mode} deviceId={deviceId} duration={duration} onModeChange={setMode} onDeviceChange={setDeviceId} onDurationChange={setDuration} />
             <button
               onClick={handleSubmit}
               disabled={!canSubmit || submitState !== "idle"}
