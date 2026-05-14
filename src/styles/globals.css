@@ -42,3 +42,8 @@ button, a, input, textarea, select, label {
 textarea, input, select {
   font-family: var(--font-sans);
 }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
