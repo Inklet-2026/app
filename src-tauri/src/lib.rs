@@ -9,13 +9,11 @@ use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutState};
 fn set_window_mode(window: tauri::WebviewWindow, mode: &str) -> Result<(), String> {
     match mode {
         "mini" => {
-            window.set_size(tauri::LogicalSize::new(400.0, 56.0)).map_err(|e| e.to_string())?;
+            window.set_size(tauri::LogicalSize::new(480.0, 140.0)).map_err(|e| e.to_string())?;
             window.set_always_on_top(true).map_err(|e| e.to_string())?;
-            window.center().map_err(|e| e.to_string())?;
         }
         "expanded" => {
-            window.set_size(tauri::LogicalSize::new(420.0, 520.0)).map_err(|e| e.to_string())?;
-            window.center().map_err(|e| e.to_string())?;
+            window.set_size(tauri::LogicalSize::new(480.0, 560.0)).map_err(|e| e.to_string())?;
         }
         _ => return Err(format!("Invalid mode: {mode}")),
     }
@@ -106,16 +104,6 @@ pub fn run() {
         .setup(|app| {
             setup_tray(app)?;
             setup_shortcut(app)?;
-            // Click-outside-to-hide: disabled during dev for easier debugging.
-            // Re-enable for production by uncommenting below.
-            // if let Some(w) = app.get_webview_window("main") {
-            //     let w2 = w.clone();
-            //     w.on_window_event(move |event| {
-            //         if let tauri::WindowEvent::Focused(false) = event {
-            //             let _ = w2.hide();
-            //         }
-            //     });
-            // }
             Ok(())
         })
         .run(tauri::generate_context!())

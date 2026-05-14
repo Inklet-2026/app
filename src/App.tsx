@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useAppStore } from "./stores/appStore";
+import { usePushStore } from "./stores/pushStore";
 import { useTauriWindow } from "./hooks/useTauriWindow";
 import { useDeviceStore } from "./stores/deviceStore";
 import InputBar from "./components/InputBar";
@@ -23,28 +24,9 @@ function ViewContent() {
   }
 }
 
-function WindowControls() {
-  return (
-    <div className="flex items-center gap-[7px] pl-3 pt-3" data-tauri-drag-region>
-      <button
-        onClick={() => {
-          import("@tauri-apps/api/core").then(({ invoke }) => invoke("hide_window"));
-        }}
-        className="w-[13px] h-[13px] rounded-full bg-[#FF5F57] hover:brightness-90 transition-all"
-      />
-      <button className="w-[13px] h-[13px] rounded-full bg-[#FEBC2E] hover:brightness-90 transition-all" />
-      <button
-        onClick={() => {
-          useAppStore.getState().toggleMode();
-        }}
-        className="w-[13px] h-[13px] rounded-full bg-[#28C840] hover:brightness-90 transition-all"
-      />
-    </div>
-  );
-}
-
 export default function App() {
   const mode = useAppStore((s) => s.mode);
+  const pushMode = usePushStore((s) => s.pushMode);
   const fetchDevices = useDeviceStore((s) => s.fetchDevices);
 
   useTauriWindow();
@@ -53,53 +35,49 @@ export default function App() {
 
   return (
     <div
-      className="flex flex-col transition-all duration-200 ease-out"
       style={{
         height: "100vh",
+        display: "flex",
+        flexDirection: "column",
         background: "var(--bg)",
-        borderRadius: mode === "mini" ? "14px" : "16px",
-        boxShadow: "0 8px 40px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.06)",
         overflow: "hidden",
       }}
     >
-      {mode === "expanded" && <WindowControls />}
+      {/* Spacer for native title bar overlay (traffic lights) */}
+      <div style={{ height: 36, flexShrink: 0 }} />
 
-      {mode === "expanded" && (
-        <div className="text-center pt-4 pb-3" data-tauri-drag-region>
-          <h1
-            className="text-[22px] tracking-[0.02em]"
-            style={{ fontFamily: "var(--font-serif)", fontWeight: 300, color: "var(--text)" }}
-          >
-            inklet
-          </h1>
-          <p
-            className="text-[11px] tracking-[0.15em] uppercase mt-0.5"
-            style={{ color: "var(--text-muted)", fontWeight: 400 }}
-          >
-            Portal
-          </p>
-        </div>
-      )}
-
-      <div className={mode === "mini" ? "px-3 py-2" : "px-5 pb-3"}>
+      {/* Input bar — always at the top, position stays fixed during expand */}
+      <div style={{ padding: "0 16px", flexShrink: 0 }}>
         <InputBar />
       </div>
 
+      {/* Expanded content — animates in below input bar */}
       {mode === "expanded" && (
-        <div className="px-5 pb-3">
-          <PushModeSelector />
-        </div>
-      )}
+        <div
+          className="expanded-content-enter"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            flex: 1,
+            overflow: "hidden",
+            minHeight: 0,
+          }}
+        >
+          <StatusIndicator />
 
-      <StatusIndicator />
+          {/* Manual mode device/duration selector */}
+          {pushMode === "manual" && (
+            <div style={{ padding: "8px 16px 0" }}>
+              <PushModeSelector />
+            </div>
+          )}
 
-      {mode === "expanded" && (
-        <>
-          <div className="flex-1 overflow-y-auto px-5 py-2">
+          <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px" }}>
             <ViewContent />
           </div>
+
           <BottomNav />
-        </>
+        </div>
       )}
     </div>
   );
