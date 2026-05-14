@@ -5,90 +5,106 @@ interface Props {
   onRemove: (id: string) => void;
 }
 
+const CARD_HEIGHT = 72;
+
+function ImageCard({ a, onRemove }: { a: Attachment; onRemove: () => void }) {
+  return (
+    <div style={{
+      flexShrink: 0, width: CARD_HEIGHT, height: CARD_HEIGHT,
+      borderRadius: 8, overflow: "hidden", position: "relative",
+      background: "var(--bg-card)", border: "1px solid var(--border)",
+    }}>
+      <div style={{
+        width: "100%", height: "100%",
+        backgroundImage: `url(${a.preview})`,
+        backgroundSize: "cover", backgroundPosition: "center",
+      }} />
+      <RemoveBtn onClick={onRemove} />
+    </div>
+  );
+}
+
+function LinkCard({ a, onRemove }: { a: Attachment; onRemove: () => void }) {
+  const og = a.og;
+  return (
+    <div style={{
+      flexShrink: 0, height: CARD_HEIGHT,
+      borderRadius: 8, overflow: "hidden", position: "relative",
+      background: "var(--bg-card)", border: "1px solid var(--border)",
+      display: "flex", maxWidth: 320,
+    }}>
+      {og?.image && (
+        <div style={{
+          width: CARD_HEIGHT, height: CARD_HEIGHT, flexShrink: 0,
+          backgroundImage: `url(${og.image})`,
+          backgroundSize: "cover", backgroundPosition: "center",
+          borderRight: "1px solid var(--border)",
+        }} />
+      )}
+      <div style={{
+        flex: 1, padding: "8px 10px", minWidth: 120,
+        display: "flex", flexDirection: "column", justifyContent: "center", gap: 2,
+        overflow: "hidden",
+      }}>
+        <div style={{
+          fontSize: 12, fontWeight: 500, color: "var(--text)",
+          overflow: "hidden", textOverflow: "ellipsis",
+          whiteSpace: "nowrap" as const,
+        }}>
+          {og?.title || a.name}
+        </div>
+        {og?.description && (
+          <div style={{
+            fontSize: 10, color: "var(--text-muted)", lineHeight: 1.3,
+            overflow: "hidden", textOverflow: "ellipsis",
+            whiteSpace: "nowrap" as const,
+          }}>
+            {og.description}
+          </div>
+        )}
+        <div style={{
+          fontSize: 10, color: "var(--text-muted)", opacity: 0.7,
+          overflow: "hidden", textOverflow: "ellipsis",
+          whiteSpace: "nowrap" as const,
+        }}>
+          {og?.hostname || a.name}
+        </div>
+      </div>
+      <RemoveBtn onClick={onRemove} />
+    </div>
+  );
+}
+
+function RemoveBtn({ onClick }: { onClick: () => void }) {
+  return (
+    <button onClick={onClick} style={{
+      position: "absolute", top: 4, right: 4,
+      width: 16, height: 16, borderRadius: "50%",
+      background: "rgba(0,0,0,0.35)", border: "none",
+      color: "white", fontSize: 10, cursor: "pointer",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      lineHeight: 1, padding: 0,
+    }}>×</button>
+  );
+}
+
 export default function AttachmentList({ attachments, onRemove }: Props) {
   if (attachments.length === 0) return null;
 
   return (
     <div style={{
       display: "flex", gap: 8,
-      padding: "8px 14px 0",
+      padding: "0 2px",
       overflowX: "auto", overflowY: "hidden",
-      flexWrap: "nowrap",
-      scrollbarWidth: "none",
+      flexWrap: "nowrap", scrollbarWidth: "none",
     }}>
-      {attachments.map((a) => (
-        <div key={a.id} style={{
-          flexShrink: 0,
-          width: 100, height: 72,
-          borderRadius: 8,
-          background: "var(--bg-card)", border: "1px solid var(--border)",
-          overflow: "hidden",
-          position: "relative",
-          display: "flex", flexDirection: "column",
-        }}>
-          {/* Preview area */}
-          {a.type === "image" && a.preview ? (
-            <div style={{
-              flex: 1, overflow: "hidden",
-              backgroundImage: `url(${a.preview})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }} />
-          ) : a.type === "link" ? (
-            <div style={{
-              flex: 1, display: "flex", flexDirection: "column",
-              alignItems: "center", justifyContent: "center",
-              padding: "6px 8px", gap: 2,
-            }}>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ opacity: 0.4 }}>
-                <path d="M6.7 9.3a3.5 3.5 0 005 0l1.6-1.6a3.5 3.5 0 00-5-5L8 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-                <path d="M9.3 6.7a3.5 3.5 0 00-5 0L2.7 8.3a3.5 3.5 0 005 5L8 13" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
-              </svg>
-              <span style={{
-                fontSize: 10, color: "var(--text-secondary)",
-                overflow: "hidden", textOverflow: "ellipsis",
-                whiteSpace: "nowrap" as const, width: "100%", textAlign: "center",
-              }}>
-                {a.name}
-              </span>
-            </div>
-          ) : (
-            <div style={{
-              flex: 1, display: "flex", alignItems: "center",
-              justifyContent: "center", fontSize: 20, opacity: 0.3,
-            }}>
-              📋
-            </div>
-          )}
-
-          {/* Name bar */}
-          <div style={{
-            padding: "3px 6px",
-            fontSize: 9, color: "var(--text-muted)",
-            overflow: "hidden", textOverflow: "ellipsis",
-            whiteSpace: "nowrap" as const,
-            borderTop: "1px solid var(--border)",
-            background: "var(--bg-card)",
-          }}>
-            {a.name}
-          </div>
-
-          {/* Remove button */}
-          <button
-            onClick={() => onRemove(a.id)}
-            style={{
-              position: "absolute", top: 3, right: 3,
-              width: 16, height: 16, borderRadius: "50%",
-              background: "rgba(0,0,0,0.4)", border: "none",
-              color: "white", fontSize: 10, cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              lineHeight: 1, padding: 0,
-            }}
-          >
-            ×
-          </button>
-        </div>
-      ))}
+      {attachments.map((a) =>
+        a.type === "link" ? (
+          <LinkCard key={a.id} a={a} onRemove={() => onRemove(a.id)} />
+        ) : (
+          <ImageCard key={a.id} a={a} onRemove={() => onRemove(a.id)} />
+        )
+      )}
     </div>
   );
 }

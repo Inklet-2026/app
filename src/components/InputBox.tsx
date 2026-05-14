@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import type { Attachment } from "../types";
+import type { Attachment, OgData } from "../types";
 import AttachmentList from "./AttachmentList";
 import LinkModal from "./LinkModal";
 import ModeSwitch from "./ModeSwitch";
@@ -10,8 +10,8 @@ function genId() {
 
 const W = 500;
 const H_BASE = 177;
-const H_ATTACHMENTS = 100;
-const H_DROPDOWN = 230;
+const H_ATTACHMENTS = 93;
+const H_DROPDOWN = 200;
 
 const toolBtn: React.CSSProperties = {
   width: 30, height: 30, borderRadius: 8,
@@ -108,8 +108,8 @@ export default function InputBox() {
     }
   }
 
-  function handleLinkSubmit(url: string, hostname: string) {
-    addAttachment({ id: genId(), type: "link", name: hostname, preview: url, url });
+  function handleLinkSubmit(og: OgData) {
+    addAttachment({ id: genId(), type: "link", name: og.hostname, preview: og.url, url: og.url, og });
     setShowLink(false);
   }
 
