@@ -8,8 +8,10 @@ function genId() {
   return Math.random().toString(36).slice(2);
 }
 
-const WINDOW_BASE = 185;
-const WINDOW_WITH_ATTACHMENTS = 285;
+const W = 500;
+const H_BASE = 177;
+const H_ATTACHMENTS = 100;
+const H_DROPDOWN = 230;
 
 const toolBtn: React.CSSProperties = {
   width: 30, height: 30, borderRadius: 8,
@@ -29,11 +31,14 @@ export default function InputBox() {
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [duration, setDuration] = useState("1h");
   const [submitting, setSubmitting] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
-    const h = attachments.length > 0 ? WINDOW_WITH_ATTACHMENTS : WINDOW_BASE;
-    (window as any).electronAPI?.resizeWindow(500, h);
-  }, [attachments.length]);
+    let h = H_BASE;
+    if (attachments.length > 0) h += H_ATTACHMENTS;
+    if (dropdownOpen) h += H_DROPDOWN;
+    (window as any).electronAPI?.resizeWindow(W, h);
+  }, [attachments.length, dropdownOpen]);
 
   function addAttachment(a: Attachment) {
     setAttachments((prev) => [...prev, a]);
@@ -166,7 +171,7 @@ export default function InputBox() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <ModeSwitch mode={mode} deviceId={deviceId} duration={duration} onModeChange={setMode} onDeviceChange={setDeviceId} onDurationChange={setDuration} />
+            <ModeSwitch mode={mode} deviceId={deviceId} duration={duration} open={dropdownOpen} onModeChange={setMode} onDeviceChange={setDeviceId} onDurationChange={setDuration} onOpenChange={setDropdownOpen} />
             <button
               onClick={handleSubmit}
               disabled={!canSubmit}

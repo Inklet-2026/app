@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback } from "react";
 
 const MOCK_DEVICES = [
   { id: "d1", name: "Study" },
@@ -20,21 +20,22 @@ interface Props {
   mode: "auto" | "manual";
   deviceId: string | null;
   duration: string;
+  open: boolean;
   onModeChange: (mode: "auto" | "manual") => void;
   onDeviceChange: (id: string) => void;
   onDurationChange: (d: string) => void;
+  onOpenChange: (open: boolean) => void;
 }
 
-export default function ModeSwitch({ mode, deviceId, duration, onModeChange, onDeviceChange, onDurationChange }: Props) {
-  const [open, setOpen] = useState(false);
+export default function ModeSwitch({ mode, deviceId, duration, open, onModeChange, onDeviceChange, onDurationChange, onOpenChange }: Props) {
   const btnRef = useRef<HTMLDivElement>(null);
   const dropRef = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const posRef = useRef({ x: 0, y: 0 });
 
   const updatePos = useCallback(() => {
     if (btnRef.current) {
       const r = btnRef.current.getBoundingClientRect();
-      setPos({ x: r.right, y: r.top });
+      posRef.current = { x: r.right, y: r.bottom };
     }
   }, []);
 
@@ -44,20 +45,15 @@ export default function ModeSwitch({ mode, deviceId, duration, onModeChange, onD
         dropRef.current && !dropRef.current.contains(e.target as Node) &&
         btnRef.current && !btnRef.current.contains(e.target as Node)
       ) {
-        setOpen(false);
+        onOpenChange(false);
       }
     }
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
-  }, []);
+  }, [onOpenChange]);
 
   useEffect(() => {
-    if (open) {
-      updatePos();
-      (window as any).electronAPI?.resizeWindow(500, 450);
-    } else {
-      (window as any).electronAPI?.resizeWindow(500, 185);
-    }
+    if (open) updatePos();
   }, [open, updatePos]);
 
   const pill: React.CSSProperties = {
@@ -68,13 +64,13 @@ export default function ModeSwitch({ mode, deviceId, duration, onModeChange, onD
 
   return (
     <>
-      <div ref={btnRef} style={{ position: "relative" }}>
+      <div ref={btnRef}>
         <div style={{
           display: "flex", borderRadius: 7, overflow: "hidden",
           border: "1px solid var(--border)",
         }}>
           <button
-            onClick={() => { onModeChange("auto"); setOpen(false); }}
+            onClick={() => { onModeChange("auto"); onOpenChange(false); }}
             style={{
               ...pill,
               background: mode === "auto" ? "var(--accent)" : "var(--bg-card)",
@@ -83,10 +79,7 @@ export default function ModeSwitch({ mode, deviceId, duration, onModeChange, onD
             }}
           >Auto</button>
           <button
-            onClick={() => {
-              onModeChange("manual");
-              setOpen(!open);
-            }}
+            onClick={() => { onModeChange("manual"); onOpenChange(!open); }}
             style={{
               ...pill,
               background: mode === "manual" ? "var(--accent)" : "var(--bg-card)",
@@ -107,14 +100,13 @@ export default function ModeSwitch({ mode, deviceId, duration, onModeChange, onD
         </div>
       </div>
 
-      {/* Dropdown — position: fixed so it's not clipped by any overflow */}
       {open && mode === "manual" && (
         <div
           ref={dropRef}
           style={{
             position: "fixed",
-            top: Math.max(8, pos.y - 220),
-            left: pos.x - 190,
+            top: posRef.current.y + 8,
+            right: 22,
             background: "var(--bg)",
             border: "1px solid var(--border)",
             borderRadius: 10, padding: 6, width: 186,
@@ -153,7 +145,7 @@ export default function ModeSwitch({ mode, deviceId, duration, onModeChange, onD
             {DURATIONS.map((d) => (
               <button
                 key={d.value}
-                onClick={() => { onDurationChange(d.value); setOpen(false); }}
+                onClick={() => { onDurationChange(d.value); onOpenChange(false); }}
                 style={{
                   fontSize: 11, padding: "3px 8px", borderRadius: 5,
                   border: "none", cursor: "pointer",
