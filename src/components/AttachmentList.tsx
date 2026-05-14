@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import type { Attachment } from "../types";
 
 interface Props {
@@ -7,10 +8,35 @@ interface Props {
 
 const CARD_HEIGHT = 72;
 
-function ImageCard({ a, onRemove }: { a: Attachment; onRemove: () => void }) {
+function AnimatedCard({ children, onRemove }: { children: React.ReactNode; onRemove: () => void }) {
+  const [state, setState] = useState<"entering" | "visible" | "exiting">("entering");
+
+  useEffect(() => {
+    const t = requestAnimationFrame(() => setState("visible"));
+    return () => cancelAnimationFrame(t);
+  }, []);
+
+  function handleRemove() {
+    setState("exiting");
+    setTimeout(onRemove, 150);
+  }
+
   return (
     <div style={{
-      flexShrink: 0, width: CARD_HEIGHT, height: CARD_HEIGHT,
+      opacity: state === "visible" ? 1 : 0,
+      transform: state === "entering" ? "scale(0.95)" : state === "exiting" ? "scale(0.95)" : "scale(1)",
+      transition: "opacity 150ms ease, transform 150ms ease",
+      flexShrink: 0,
+    }}>
+      {typeof children === "function" ? (children as any)(handleRemove) : children}
+    </div>
+  );
+}
+
+function ImageCard({ a, onAnimatedRemove }: { a: Attachment; onAnimatedRemove: () => void }) {
+  return (
+    <div style={{
+      width: CARD_HEIGHT, height: CARD_HEIGHT,
       borderRadius: 12, overflow: "hidden", position: "relative",
       background: "var(--bg-card)", border: "1px solid var(--border)",
       display: "flex", flexDirection: "column",
@@ -28,16 +54,16 @@ function ImageCard({ a, onRemove }: { a: Attachment; onRemove: () => void }) {
       }}>
         {a.name}
       </div>
-      <RemoveBtn onClick={onRemove} />
+      <RemoveBtn onClick={onAnimatedRemove} />
     </div>
   );
 }
 
-function LinkCard({ a, onRemove }: { a: Attachment; onRemove: () => void }) {
+function LinkCard({ a, onAnimatedRemove }: { a: Attachment; onAnimatedRemove: () => void }) {
   const og = a.og;
   return (
     <div style={{
-      flexShrink: 0, height: CARD_HEIGHT,
+      height: CARD_HEIGHT,
       borderRadius: 12, overflow: "hidden", position: "relative",
       background: "var(--bg-card)", border: "1px solid var(--border)",
       display: "flex", width: 220,
@@ -71,13 +97,11 @@ function LinkCard({ a, onRemove }: { a: Attachment; onRemove: () => void }) {
             {og.description}
           </div>
         )}
-        <div style={{
-          fontSize: 9, color: "var(--text-muted)", opacity: 0.6,
-        }}>
+        <div style={{ fontSize: 9, color: "var(--text-muted)", opacity: 0.6 }}>
           {og?.hostname || a.name}
         </div>
       </div>
-      <RemoveBtn onClick={onRemove} />
+      <RemoveBtn onClick={onAnimatedRemove} />
     </div>
   );
 }
@@ -103,15 +127,20 @@ export default function AttachmentList({ attachments, onRemove }: Props) {
       display: "flex", gap: 8,
       padding: 0,
       overflowX: "auto", overflowY: "hidden",
-      flexWrap: "nowrap", scrollbarWidth: "none",
+      flexWrap: "nowrap", scrollbarWidth: "thin",
+      scrollbarColor: "var(--border) transparent",
     }}>
-      {attachments.map((a) =>
-        a.type === "link" ? (
-          <LinkCard key={a.id} a={a} onRemove={() => onRemove(a.id)} />
-        ) : (
-          <ImageCard key={a.id} a={a} onRemove={() => onRemove(a.id)} />
-        )
-      )}
+      {attachments.map((a) => (
+        <AnimatedCard key={a.id} onRemove={() => onRemove(a.id)}>
+          {(handleRemove: () => void) =>
+            a.type === "link" ? (
+              <LinkCard a={a} onAnimatedRemove={handleRemove} />
+            ) : (
+              <ImageCard a={a} onAnimatedRemove={handleRemove} />
+            )
+          }
+        </AnimatedCard>
+      ))}
     </div>
   );
 }

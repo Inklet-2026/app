@@ -207,12 +207,11 @@ export default function InputBox() {
       {/* Attachments — only render after window has expanded */}
       {attachReady && attachments.length > 0 && (
         <div style={{
-          paddingTop: 6,
+          paddingTop: 8,
           overflowX: "auto",
           overflowY: "hidden",
           scrollbarWidth: "thin",
           scrollbarColor: "var(--border) transparent",
-          animation: "fadeIn 150ms ease-in",
         }}>
           <AttachmentList attachments={attachments} onRemove={removeAttachment} />
         </div>
