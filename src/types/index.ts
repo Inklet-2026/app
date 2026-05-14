@@ -1,3 +1,13 @@
+export type AttachmentType = "image" | "link" | "clipboard";
+
+export interface Attachment {
+  id: string;
+  type: AttachmentType;
+  name: string;
+  preview: string;
+  url?: string;
+}
+
 export type WindowMode = "mini" | "expanded";
 export type ActiveTab = "home" | "history" | "devices" | "sources" | "settings";
 export type PushMode = "auto" | "manual";

@@ -1,10 +1,9 @@
 import { useEffect } from "react";
 import { useAppStore } from "./stores/appStore";
-import { usePushStore } from "./stores/pushStore";
+import { useAuthStore } from "./stores/authStore";
 import { useTauriWindow } from "./hooks/useTauriWindow";
 import { useDeviceStore } from "./stores/deviceStore";
 import InputBar from "./components/InputBar";
-import PushModeSelector from "./components/PushModeSelector";
 import StatusIndicator from "./components/StatusIndicator";
 import BottomNav from "./components/BottomNav";
 import HomeView from "./views/HomeView";
@@ -24,9 +23,86 @@ function ViewContent() {
   }
 }
 
+function PortalHeader() {
+  const user = useAuthStore((s) => s.user);
+  const avatarLetter = user?.name?.charAt(0)?.toUpperCase() ?? "?";
+
+  return (
+    <div
+      data-tauri-drag-region
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "10px 16px 6px",
+        background: "var(--bg)",
+        flexShrink: 0,
+      }}
+    >
+      {/* Brand */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "baseline",
+          gap: 4,
+          WebkitAppRegion: "drag",
+        } as React.CSSProperties}
+      >
+        <span
+          style={{
+            fontFamily: "var(--font-serif)",
+            fontWeight: 300,
+            fontSize: 16,
+            color: "var(--text)",
+            letterSpacing: "-0.01em",
+          }}
+        >
+          inklet
+        </span>
+        <span
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontWeight: 600,
+            fontSize: 10,
+            color: "var(--text-muted)",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+          }}
+        >
+          PORTAL
+        </span>
+      </div>
+
+      {/* Avatar */}
+      <div
+        style={{ WebkitAppRegion: "no-drag" } as React.CSSProperties}
+      >
+        <div
+          style={{
+            width: 26,
+            height: 26,
+            borderRadius: "50%",
+            background: "var(--accent)",
+            color: "var(--bg)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 11,
+            fontWeight: 600,
+            fontFamily: "var(--font-sans)",
+            cursor: "pointer",
+          }}
+          title={user?.name ?? "Account"}
+        >
+          {avatarLetter}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const mode = useAppStore((s) => s.mode);
-  const pushMode = usePushStore((s) => s.pushMode);
   const fetchDevices = useDeviceStore((s) => s.fetchDevices);
 
   useTauriWindow();
@@ -39,45 +115,48 @@ export default function App() {
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-        background: "var(--bg)",
+        background: mode === "mini" ? "transparent" : "var(--bg)",
+        borderRadius: 14,
         overflow: "hidden",
+        boxShadow: "0 8px 40px rgba(0,0,0,0.18)",
       }}
     >
-      {/* Spacer for native title bar overlay (traffic lights) */}
-      <div style={{ height: 36, flexShrink: 0 }} />
+      {mode === "mini" ? (
+        /* Mini mode: transparent top spacer + input bar */
+        <>
+          <div style={{ height: 8, flexShrink: 0 }} />
+          <div style={{ padding: "0 0 8px", flexShrink: 0 }}>
+            <InputBar />
+          </div>
+        </>
+      ) : (
+        /* Expanded mode: custom header + input + content + nav */
+        <>
+          <PortalHeader />
 
-      {/* Input bar — always at the top, position stays fixed during expand */}
-      <div style={{ padding: "0 16px", flexShrink: 0 }}>
-        <InputBar />
-      </div>
-
-      {/* Expanded content — animates in below input bar */}
-      {mode === "expanded" && (
-        <div
-          className="expanded-content-enter"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            flex: 1,
-            overflow: "hidden",
-            minHeight: 0,
-          }}
-        >
-          <StatusIndicator />
-
-          {/* Manual mode device/duration selector */}
-          {pushMode === "manual" && (
-            <div style={{ padding: "8px 16px 0" }}>
-              <PushModeSelector />
-            </div>
-          )}
-
-          <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px" }}>
-            <ViewContent />
+          <div style={{ padding: "0 16px", flexShrink: 0 }}>
+            <InputBar />
           </div>
 
-          <BottomNav />
-        </div>
+          <div
+            className="expanded-content-enter"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
+              overflow: "hidden",
+              minHeight: 0,
+            }}
+          >
+            <StatusIndicator />
+
+            <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px" }}>
+              <ViewContent />
+            </div>
+
+            <BottomNav />
+          </div>
+        </>
       )}
     </div>
   );
