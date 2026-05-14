@@ -226,8 +226,9 @@ export default function InputBox() {
                   <path d="M12.5 7a5.5 5.5 0 0 0-5.5-5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
               ) : submitState === "success" ? (
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ animation: "checkPop 300ms ease-out" }}>
-                  <path d="M3 7.5l3 3 5-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M3 7.5l3 3 5-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+                    strokeDasharray="15" strokeDashoffset="15" style={{ animation: "checkDraw 400ms ease-out forwards" }}/>
                 </svg>
               ) : (
                 <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
