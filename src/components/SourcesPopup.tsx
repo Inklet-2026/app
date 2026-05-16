@@ -217,8 +217,8 @@ function SyncButton() {
   );
 }
 
-const H_BASE = 170;
-const H_EXPANDED = 110;
+const H_BASE = 185;
+const H_EXPANDED = 90;
 
 export default function SourcesPopup() {
   const [sources, setSources] = useState<SourceState>({ obsidian: null, logseq: null });
