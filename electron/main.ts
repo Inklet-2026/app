@@ -323,7 +323,7 @@ ipcMain.handle("get-sources", () => {
 });
 
 ipcMain.on("show-sources-popup", (_e, { x, y }: { x: number; y: number }) => {
-  showPopup("sources", 260, 280, x, y);
+  showPopup("sources", 260, 180, x, y);
 });
 
 app.whenReady().then(createWindow);
