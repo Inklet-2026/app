@@ -152,6 +152,47 @@ function SyncFrequency() {
   );
 }
 
+function SyncButton() {
+  const [state, setState] = useState<"idle" | "syncing" | "done">("idle");
+
+  function handleSync() {
+    if (state !== "idle") return;
+    setState("syncing");
+    setTimeout(() => {
+      setState("done");
+      setTimeout(() => setState("idle"), 1200);
+    }, 800);
+  }
+
+  return (
+    <button onClick={handleSync} style={{
+      fontSize: 10, border: "none", cursor: state === "idle" ? "pointer" : "default",
+      background: "none", fontFamily: "var(--font-sans)",
+      color: state === "done" ? "#34A853" : "var(--text-muted)",
+      display: "flex", alignItems: "center", gap: 3,
+      padding: 0, transition: "color 200ms",
+    }}>
+      {state === "syncing" ? (
+        <>
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ animation: "spin 600ms linear infinite" }}>
+            <circle cx="5" cy="5" r="3.5" stroke="currentColor" strokeWidth="1.2" opacity="0.25"/>
+            <path d="M8.5 5a3.5 3.5 0 0 0-3.5-3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+          </svg>
+          syncing...
+        </>
+      ) : state === "done" ? (
+        <>
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M2 5.5l2.5 2.5 3.5-4.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
+              strokeDasharray="12" strokeDashoffset="12" style={{ animation: "checkDraw 400ms ease-out forwards" }}/>
+          </svg>
+          synced
+        </>
+      ) : "sync"}
+    </button>
+  );
+}
+
 export default function SourcesPopup() {
   const [sources, setSources] = useState<SourceState>({ obsidian: null, logseq: null });
 
@@ -180,12 +221,18 @@ export default function SourcesPopup() {
       height: "100vh", display: "flex", flexDirection: "column",
       border: "1px solid var(--border)",
     }}>
-      <p style={{
-        fontSize: 10, color: "var(--text-muted)", padding: "2px 8px 3px", margin: 0,
-        textTransform: "uppercase" as const, letterSpacing: "0.06em",
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "2px 8px 3px",
       }}>
-        Sources
-      </p>
+        <span style={{
+          fontSize: 10, color: "var(--text-muted)", margin: 0,
+          textTransform: "uppercase" as const, letterSpacing: "0.06em",
+        }}>
+          Sources
+        </span>
+        <SyncButton />
+      </div>
 
       <SourceRow
         name="Obsidian" icon={<SiObsidian />} config={sources.obsidian}
