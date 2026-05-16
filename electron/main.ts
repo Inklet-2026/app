@@ -67,6 +67,7 @@ function registerHotkey(accelerator: string) {
         if (ctx.selectedText || ctx.chromeUrl) {
           win.webContents.send("system-context", ctx);
         }
+        win.webContents.send("window-shown");
       }
     });
     currentShortcut = accelerator;

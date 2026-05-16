@@ -52,4 +52,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   onSystemContext: (cb: (ctx: { selectedText: string; chromeUrl: string }) => void) => {
     ipcRenderer.on("system-context", (_e, ctx) => cb(ctx));
   },
+  onWindowShown: (cb: () => void) => {
+    ipcRenderer.on("window-shown", () => cb());
+  },
 });

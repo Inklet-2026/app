@@ -60,6 +60,9 @@ export default function InputBox({ disabled, onLoginClick }: { disabled?: boolea
         setSuggestionType("url");
       }
     });
+    (window as any).electronAPI?.onWindowShown?.(() => {
+      setTimeout(() => textareaRef.current?.focus(), 50);
+    });
   }, [content]);
 
   const [attachReady, setAttachReady] = useState(false);
