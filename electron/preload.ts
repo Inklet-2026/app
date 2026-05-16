@@ -49,4 +49,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.send("set-open-at-login", value);
   },
   getOpenAtLogin: () => ipcRenderer.invoke("get-open-at-login"),
+  onSystemContext: (cb: (ctx: { selectedText: string; chromeUrl: string }) => void) => {
+    ipcRenderer.on("system-context", (_e, ctx) => cb(ctx));
+  },
 });

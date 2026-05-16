@@ -39,6 +39,7 @@ export default function InputBox({ disabled, onLoginClick }: { disabled?: boolea
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [content, setContent] = useState("");
+  const [suggestion, setSuggestion] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [showLink, setShowLink] = useState(false);
   const [mode, setMode] = useState<"auto" | "manual">("auto");
@@ -46,6 +47,14 @@ export default function InputBox({ disabled, onLoginClick }: { disabled?: boolea
   const [duration, setDuration] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitState, setSubmitState] = useState<"idle" | "loading" | "success">("idle");
+
+  useEffect(() => {
+    (window as any).electronAPI?.onSystemContext?.((ctx: { selectedText: string; chromeUrl: string }) => {
+      if (content) return;
+      const text = ctx.selectedText || ctx.chromeUrl || "";
+      if (text) setSuggestion(text);
+    });
+  }, [content]);
 
   const [attachReady, setAttachReady] = useState(false);
   const prevAttachCount = useRef(0);
@@ -80,6 +89,7 @@ export default function InputBox({ disabled, onLoginClick }: { disabled?: boolea
     setSubmitState("loading");
     await new Promise((r) => setTimeout(r, 800));
     setContent("");
+    setSuggestion("");
     setAttachments([]);
     setSubmitting(false);
     setSubmitState("success");
@@ -177,20 +187,43 @@ export default function InputBox({ disabled, onLoginClick }: { disabled?: boolea
             </span>
           </div>
         )}
-        <div style={{ padding: "12px 14px 0", minHeight: 0 }}>
+        <div style={{ padding: "12px 14px 0", minHeight: 0, position: "relative" }}>
+          {/* Ghost suggestion text */}
+          {!content && suggestion && (
+            <div style={{
+              position: "absolute", top: 12, left: 14, right: 14,
+              fontSize: 14, lineHeight: 1.5, color: "var(--text-muted)",
+              opacity: 0.5, pointerEvents: "none",
+              overflow: "hidden", whiteSpace: "pre-wrap" as const,
+              wordBreak: "break-word" as const,
+            }}>
+              {suggestion}
+            </div>
+          )}
           <textarea
             ref={textareaRef}
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSubmit(); }}}
+            onChange={(e) => { setContent(e.target.value); if (e.target.value) setSuggestion(""); }}
+            onKeyDown={(e) => {
+              if ((e.key === "Tab" || e.key === "ArrowRight") && !content && suggestion) {
+                e.preventDefault();
+                setContent(suggestion);
+                setSuggestion("");
+              } else if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit();
+              } else if (e.key === "Escape" && suggestion) {
+                setSuggestion("");
+              }
+            }}
             onPaste={handlePaste}
-            placeholder="Push content to device..."
+            placeholder={suggestion ? "" : "Push content to device..."}
             rows={3}
             style={{
               width: "100%", background: "transparent",
               border: "none", outline: "none", resize: "none",
               fontSize: 14, lineHeight: 1.5, color: "var(--text)",
-              padding: 0, margin: 0,
+              padding: 0, margin: 0, position: "relative", zIndex: 1,
             }}
           />
         </div>

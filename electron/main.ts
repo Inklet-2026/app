@@ -1,6 +1,7 @@
 import { app, BrowserWindow, globalShortcut, ipcMain, screen, shell } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { execFile } from "node:child_process";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -9,22 +10,65 @@ let popup: BrowserWindow | null = null;
 let currentShortcut = "CommandOrControl+L";
 let closeToTray = true;
 
+function runAppleScript(script: string): Promise<string> {
+  return new Promise((resolve) => {
+    if (process.platform !== "darwin") { resolve(""); return; }
+    execFile("osascript", ["-e", script], { timeout: 2000 }, (err, stdout) => {
+      resolve(err ? "" : stdout.trim());
+    });
+  });
+}
+
+async function getSystemContext(): Promise<{ selectedText: string; chromeUrl: string }> {
+  const [selectedText, chromeUrl] = await Promise.all([
+    runAppleScript(`
+      try
+        tell application "System Events"
+          set frontApp to name of first application process whose frontmost is true
+          set selectedText to value of attribute "AXSelectedText" of focused UI element of application process frontApp
+          return selectedText
+        end tell
+      on error
+        return ""
+      end try
+    `),
+    runAppleScript(`
+      try
+        if application "Google Chrome" is running then
+          tell application "Google Chrome"
+            if (count of windows) > 0 then
+              return URL of active tab of front window
+            end if
+          end tell
+        end if
+        return ""
+      on error
+        return ""
+      end try
+    `),
+  ]);
+  return { selectedText, chromeUrl };
+}
+
 function registerHotkey(accelerator: string) {
   globalShortcut.unregisterAll();
   if (!accelerator) return;
   try {
-    globalShortcut.register(accelerator, () => {
+    globalShortcut.register(accelerator, async () => {
       if (!win) return;
       if (win.isVisible() && win.isFocused()) {
         win.hide();
       } else {
+        const ctx = await getSystemContext();
         win.show();
         win.focus();
+        if (ctx.selectedText || ctx.chromeUrl) {
+          win.webContents.send("system-context", ctx);
+        }
       }
     });
     currentShortcut = accelerator;
   } catch {
-    // invalid accelerator, re-register old one
     if (currentShortcut && currentShortcut !== accelerator) {
       registerHotkey(currentShortcut);
     }
