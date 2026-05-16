@@ -8,7 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 let win: BrowserWindow | null = null;
 let popup: BrowserWindow | null = null;
 let popupBlurLocked = false;
-let currentShortcut = "CommandOrControl+L";
+let currentShortcut = "CommandOrControl+Shift+I";
 let closeToTray = false;
 
 function runAppleScript(script: string): Promise<string> {

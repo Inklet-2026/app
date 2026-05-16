@@ -37,7 +37,7 @@ function readStore(): StoreData {
   try {
     return JSON.parse(fs.readFileSync(storeFile(), "utf-8"));
   } catch {
-    return { sources: {}, syncFrequency: "1d", hotkey: "CommandOrControl+L", closeToTray: false };
+    return { sources: {}, syncFrequency: "1d", hotkey: "CommandOrControl+Shift+I", closeToTray: false };
   }
 }
 
