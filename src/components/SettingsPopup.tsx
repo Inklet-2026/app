@@ -122,7 +122,7 @@ export default function SettingsPopup() {
 
       <p style={{
         fontSize: 10, color: "var(--text-muted)", textAlign: "center",
-        margin: "4px 0 0", opacity: 0.5,
+        margin: "8px 0 0", opacity: 0.5,
       }}>
         inklet Portal v0.1.0
       </p>
