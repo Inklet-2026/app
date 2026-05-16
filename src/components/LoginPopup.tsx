@@ -56,6 +56,16 @@ export default function LoginPopup() {
       }}>
         Sign in
       </button>
+      <p style={{
+        fontSize: 11, color: "var(--text-muted)", textAlign: "center",
+        margin: "10px 0 0",
+      }}>
+        Don't have an account?{" "}
+        <span
+          onClick={() => (window as any).electronAPI?.openExternal("https://www.iminklet.com")}
+          style={{ color: "var(--text-secondary)", textDecoration: "underline", cursor: "pointer" }}
+        >Sign up</span>
+      </p>
     </div>
   );
 }
