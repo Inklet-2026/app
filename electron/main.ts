@@ -9,7 +9,7 @@ let win: BrowserWindow | null = null;
 let popup: BrowserWindow | null = null;
 let popupBlurLocked = false;
 let currentShortcut = "CommandOrControl+L";
-let closeToTray = true;
+let closeToTray = false;
 
 function runAppleScript(script: string): Promise<string> {
   return new Promise((resolve) => {
@@ -122,6 +122,8 @@ function createWindow() {
     win.loadFile(path.join(__dirname, "../dist/index.html"));
   }
 
+  currentShortcut = getHotkey();
+  closeToTray = getCloseToTray();
   registerHotkey(currentShortcut);
 }
 
@@ -200,10 +202,12 @@ ipcMain.on("open-external", (_e, url: string) => {
 
 ipcMain.on("update-hotkey", (_e, accelerator: string) => {
   registerHotkey(accelerator);
+  if (accelerator) storeHotkey(accelerator);
 });
 
 ipcMain.on("update-close-to-tray", (_e, value: boolean) => {
   closeToTray = value;
+  storeCloseToTray(value);
 });
 
 ipcMain.on("quit-app", () => {
@@ -259,7 +263,7 @@ ipcMain.handle("fetch-og", async (_e, url: string) => {
 
 // --- Source management (Obsidian / Logseq) ---
 
-import { loadSources, saveSource, removeSource, updateSourceConfig, syncSource, getSyncFrequency, setSyncFrequency } from "./sync.js";
+import { loadSources, saveSource, removeSource, updateSourceConfig, syncSource, getSyncFrequency, setSyncFrequency, getHotkey, setHotkey as storeHotkey, getCloseToTray, setCloseToTray as storeCloseToTray } from "./sync.js";
 
 let syncTimer: ReturnType<typeof setInterval> | null = null;
 

@@ -27,6 +27,8 @@ export interface DiffResult {
 interface StoreData {
   sources: Record<string, SyncState>;
   syncFrequency: string;
+  hotkey: string;
+  closeToTray: boolean;
 }
 
 const storeFile = () => path.join(app.getPath("userData"), "inklet-sources.json");
@@ -35,7 +37,7 @@ function readStore(): StoreData {
   try {
     return JSON.parse(fs.readFileSync(storeFile(), "utf-8"));
   } catch {
-    return { sources: {}, syncFrequency: "1d" };
+    return { sources: {}, syncFrequency: "1d", hotkey: "CommandOrControl+L", closeToTray: false };
   }
 }
 
@@ -148,6 +150,26 @@ export function getSyncFrequency(): string {
 export function setSyncFrequency(freq: string) {
   const store = readStore();
   store.syncFrequency = freq;
+  writeStore(store);
+}
+
+export function getHotkey(): string {
+  return readStore().hotkey;
+}
+
+export function setHotkey(key: string) {
+  const store = readStore();
+  store.hotkey = key;
+  writeStore(store);
+}
+
+export function getCloseToTray(): boolean {
+  return readStore().closeToTray;
+}
+
+export function setCloseToTray(val: boolean) {
+  const store = readStore();
+  store.closeToTray = val;
   writeStore(store);
 }
 
