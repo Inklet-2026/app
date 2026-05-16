@@ -40,6 +40,7 @@ export default function InputBox({ disabled, onLoginClick }: { disabled?: boolea
 
   const [content, setContent] = useState("");
   const [suggestion, setSuggestion] = useState("");
+  const [suggestionType, setSuggestionType] = useState<"text" | "url">("text");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [showLink, setShowLink] = useState(false);
   const [mode, setMode] = useState<"auto" | "manual">("auto");
@@ -51,8 +52,13 @@ export default function InputBox({ disabled, onLoginClick }: { disabled?: boolea
   useEffect(() => {
     (window as any).electronAPI?.onSystemContext?.((ctx: { selectedText: string; chromeUrl: string }) => {
       if (content) return;
-      const text = ctx.selectedText || ctx.chromeUrl || "";
-      if (text) setSuggestion(text);
+      if (ctx.selectedText) {
+        setSuggestion(ctx.selectedText);
+        setSuggestionType("text");
+      } else if (ctx.chromeUrl) {
+        setSuggestion(ctx.chromeUrl);
+        setSuggestionType("url");
+      }
     });
   }, [content]);
 
@@ -153,6 +159,16 @@ export default function InputBox({ disabled, onLoginClick }: { disabled?: boolea
     setShowLink(false);
   }
 
+  async function acceptUrlSuggestion(url: string) {
+    try {
+      const og: OgData = await (window as any).electronAPI.fetchOg(url);
+      addAttachment({ id: genId(), type: "link", name: og.hostname, preview: og.url, url: og.url, og });
+    } catch {
+      const hostname = new URL(url).hostname;
+      addAttachment({ id: genId(), type: "link", name: hostname, preview: url, url });
+    }
+  }
+
   const canSubmit = !submitting && (content.trim().length > 0 || attachments.length > 0);
 
   return (
@@ -207,7 +223,11 @@ export default function InputBox({ disabled, onLoginClick }: { disabled?: boolea
             onKeyDown={(e) => {
               if ((e.key === "Tab" || e.key === "ArrowRight") && !content && suggestion) {
                 e.preventDefault();
-                setContent(suggestion);
+                if (suggestionType === "url") {
+                  acceptUrlSuggestion(suggestion);
+                } else {
+                  setContent(suggestion);
+                }
                 setSuggestion("");
               } else if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();

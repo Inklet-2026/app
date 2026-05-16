@@ -19,35 +19,30 @@ function runAppleScript(script: string): Promise<string> {
   });
 }
 
-async function getSystemContext(): Promise<{ selectedText: string; chromeUrl: string }> {
+async function getSystemContext(): Promise<{ selectedText: string; chromeUrl: string; frontApp: string }> {
+  const frontApp = await runAppleScript(`
+    tell application "System Events" to return name of first application process whose frontmost is true
+  `);
+
   const [selectedText, chromeUrl] = await Promise.all([
     runAppleScript(`
       try
         tell application "System Events"
-          set frontApp to name of first application process whose frontmost is true
-          set selectedText to value of attribute "AXSelectedText" of focused UI element of application process frontApp
-          return selectedText
+          return value of attribute "AXSelectedText" of focused UI element of application process "${frontApp}"
         end tell
       on error
         return ""
       end try
     `),
-    runAppleScript(`
+    frontApp === "Google Chrome" ? runAppleScript(`
       try
-        if application "Google Chrome" is running then
-          tell application "Google Chrome"
-            if (count of windows) > 0 then
-              return URL of active tab of front window
-            end if
-          end tell
-        end if
-        return ""
+        tell application "Google Chrome" to return URL of active tab of front window
       on error
         return ""
       end try
-    `),
+    `) : Promise.resolve(""),
   ]);
-  return { selectedText, chromeUrl };
+  return { selectedText, chromeUrl, frontApp };
 }
 
 function registerHotkey(accelerator: string) {
