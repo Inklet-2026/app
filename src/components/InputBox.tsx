@@ -217,6 +217,13 @@ export default function InputBox({ disabled, onLoginClick }: { disabled?: boolea
               wordBreak: "break-word" as const,
             }}>
               {suggestion}
+              <span style={{
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                background: "var(--border)", borderRadius: 4,
+                padding: "1px 5px", marginLeft: 6,
+                fontSize: 10, color: "var(--text-muted)", opacity: 1,
+                verticalAlign: "middle", fontFamily: "var(--font-sans)",
+              }}>Tab</span>
             </div>
           )}
           <textarea
