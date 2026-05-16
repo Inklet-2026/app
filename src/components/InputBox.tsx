@@ -146,7 +146,7 @@ export default function InputBox({ disabled, onLoginClick }: { disabled?: boolea
     } else if (isText) {
       const reader = new FileReader();
       reader.onload = () => {
-        const text = (reader.result as string).slice(0, 50000);
+        const text = reader.result as string;
         setContent((c) => c + (c ? "\n\n" : "") + text);
         textareaRef.current?.focus();
       };
