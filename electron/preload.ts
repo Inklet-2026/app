@@ -52,6 +52,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   showSourcesPopup: (x: number, y: number) => {
     ipcRenderer.send("show-sources-popup", { x, y });
   },
+  detectVaults: () => ipcRenderer.invoke("detect-vaults"),
   selectFolder: () => ipcRenderer.invoke("select-folder"),
   connectSource: (type: string, folderPath: string) => ipcRenderer.invoke("connect-source", type, folderPath),
   disconnectSource: (type: string) => ipcRenderer.send("disconnect-source", type),

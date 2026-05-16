@@ -220,9 +220,59 @@ function SyncButton() {
 const H_BASE = 198;
 const H_EXPANDED = 75.5;
 
+interface DetectedVault {
+  name: string;
+  path: string;
+}
+
+function VaultPicker({ vaults, onSelect, onBrowse }: {
+  vaults: DetectedVault[];
+  onSelect: (path: string) => void;
+  onBrowse: () => void;
+}) {
+  return (
+    <div style={{ padding: "4px 8px 4px 30px", display: "flex", flexDirection: "column", gap: 2 }}>
+      {vaults.map((v) => (
+        <button
+          key={v.path}
+          onClick={() => onSelect(v.path)}
+          style={{
+            display: "flex", alignItems: "center", gap: 6,
+            width: "100%", padding: "5px 8px", borderRadius: 6,
+            background: "none", border: "none", cursor: "pointer",
+            fontFamily: "var(--font-sans)", textAlign: "left",
+            fontSize: 11, color: "var(--text)", transition: "background 80ms",
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-card)"}
+          onMouseLeave={(e) => e.currentTarget.style.background = "none"}
+        >
+          <span style={{ flex: 1 }}>{v.name}</span>
+          <span style={{
+            fontSize: 9, color: "var(--text-muted)", maxWidth: 100,
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const,
+            direction: "rtl" as const, textAlign: "left" as const,
+          }}>{v.path}</span>
+        </button>
+      ))}
+      <button
+        onClick={onBrowse}
+        style={{
+          fontSize: 10, color: "var(--text-muted)", background: "none",
+          border: "none", cursor: "pointer", fontFamily: "var(--font-sans)",
+          padding: "4px 8px", textAlign: "left",
+        }}
+      >
+        Browse manually...
+      </button>
+    </div>
+  );
+}
+
 export default function SourcesPopup() {
   const [sources, setSources] = useState<SourceState>({ obsidian: null, logseq: null });
   const [expandedCount, setExpandedCount] = useState(0);
+  const [picking, setPicking] = useState<"obsidian" | "logseq" | null>(null);
+  const [detected, setDetected] = useState<{ obsidian: DetectedVault[]; logseq: DetectedVault[] }>({ obsidian: [], logseq: [] });
 
   useEffect(() => {
     (window as any).electronAPI?.getSources?.().then((s: SourceState) => {
@@ -231,11 +281,39 @@ export default function SourcesPopup() {
   }, []);
 
   useEffect(() => {
-    const h = H_BASE + expandedCount * H_EXPANDED;
+    let extra = expandedCount * H_EXPANDED;
+    if (picking) {
+      const vaults = detected[picking];
+      extra += (vaults.length + 1) * 26 + 8;
+    }
+    const h = H_BASE + extra;
     (window as any).electronAPI?.resizePopup(h);
-  }, [expandedCount]);
+  }, [expandedCount, picking, detected]);
 
-  async function connectSource(type: "obsidian" | "logseq") {
+  async function handleConnect(type: "obsidian" | "logseq") {
+    const result = await (window as any).electronAPI?.detectVaults();
+    if (result) setDetected(result);
+    const vaults = result?.[type] ?? [];
+    if (vaults.length > 0) {
+      setPicking(type);
+    } else {
+      browseManually(type);
+    }
+  }
+
+  async function selectVault(type: "obsidian" | "logseq", vaultPath: string) {
+    setPicking(null);
+    const updated = await (window as any).electronAPI?.connectSource(type, vaultPath);
+    const config: VaultConfig = {
+      path: vaultPath, name: vaultPath.split("/").pop() || type,
+      totalDocs: updated?.totalDocs ?? 0, syncedDocs: updated?.syncedDocs ?? 0,
+      autoSyncNew: true, syncing: false,
+    };
+    setSources((s) => ({ ...s, [type]: config }));
+  }
+
+  async function browseManually(type: "obsidian" | "logseq") {
+    setPicking(null);
     const result = await (window as any).electronAPI?.selectFolder();
     if (!result) return;
     const updated = await (window as any).electronAPI?.connectSource(type, result);
@@ -267,7 +345,7 @@ export default function SourcesPopup() {
 
       <SourceRow
         name="Obsidian" icon={<SiObsidian />} config={sources.obsidian}
-        onConnect={() => connectSource("obsidian")}
+        onConnect={() => handleConnect("obsidian")}
         onDisconnect={() => {
           (window as any).electronAPI?.disconnectSource("obsidian");
           setSources((s) => ({ ...s, obsidian: null }));
@@ -280,10 +358,13 @@ export default function SourcesPopup() {
         }}
         onExpandChange={(exp) => setExpandedCount((c) => c + (exp ? 1 : -1))}
       />
+      {picking === "obsidian" && (
+        <VaultPicker vaults={detected.obsidian} onSelect={(p) => selectVault("obsidian", p)} onBrowse={() => browseManually("obsidian")} />
+      )}
 
       <SourceRow
         name="Logseq" icon={<SiLogseq />} config={sources.logseq}
-        onConnect={() => connectSource("logseq")}
+        onConnect={() => handleConnect("logseq")}
         onDisconnect={() => {
           (window as any).electronAPI?.disconnectSource("logseq");
           setSources((s) => ({ ...s, logseq: null }));
@@ -296,6 +377,9 @@ export default function SourcesPopup() {
         }}
         onExpandChange={(exp) => setExpandedCount((c) => c + (exp ? 1 : -1))}
       />
+      {picking === "logseq" && (
+        <VaultPicker vaults={detected.logseq} onSelect={(p) => selectVault("logseq", p)} onBrowse={() => browseManually("logseq")} />
+      )}
 
       <SourceRow name="Notion" icon={<SiNotion />} config={null} comingSoon />
       <SourceRow name="Craft" icon={<TbBrandCraft />} config={null} comingSoon />

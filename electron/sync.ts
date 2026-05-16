@@ -110,6 +110,74 @@ export function getFileContent(sourceDir: string, relativePath: string): string 
   }
 }
 
+export interface DetectedVault {
+  name: string;
+  path: string;
+}
+
+export function detectObsidianVaults(): DetectedVault[] {
+  try {
+    const configPath = path.join(
+      process.env.HOME || "",
+      "Library/Application Support/obsidian/obsidian.json"
+    );
+    const data = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+    const vaults: DetectedVault[] = [];
+    for (const v of Object.values(data.vaults || {}) as any[]) {
+      if (v.path && fs.existsSync(v.path)) {
+        vaults.push({ name: v.path.split("/").pop() || "vault", path: v.path });
+      }
+    }
+    return vaults;
+  } catch {
+    return [];
+  }
+}
+
+export function detectLogseqGraphs(): DetectedVault[] {
+  try {
+    const home = process.env.HOME || "";
+    const candidates = [
+      path.join(home, ".logseq/config/config.edn"),
+      path.join(home, ".logseq/preferences.json"),
+    ];
+
+    for (const c of candidates) {
+      if (!fs.existsSync(c)) continue;
+      const content = fs.readFileSync(c, "utf-8");
+
+      if (c.endsWith(".json")) {
+        const data = JSON.parse(content);
+        if (data.graphs) {
+          return (data.graphs as any[])
+            .filter((g: any) => g.path && fs.existsSync(g.path))
+            .map((g: any) => ({ name: g.path.split("/").pop() || "graph", path: g.path }));
+        }
+      }
+
+      if (c.endsWith(".edn")) {
+        const paths = [...content.matchAll(/:graph\/path\s+"([^"]+)"/g)];
+        return paths
+          .map((m) => m[1])
+          .filter((p) => fs.existsSync(p))
+          .map((p) => ({ name: p.split("/").pop() || "graph", path: p }));
+      }
+    }
+
+    const logseqDir = path.join(home, "Documents");
+    if (fs.existsSync(logseqDir)) {
+      const entries = fs.readdirSync(logseqDir, { withFileTypes: true });
+      return entries
+        .filter((e) => e.isDirectory() && fs.existsSync(path.join(logseqDir, e.name, "logseq")))
+        .map((e) => ({ name: e.name, path: path.join(logseqDir, e.name) }));
+    }
+
+    return [];
+  } catch {
+    return [];
+  }
+}
+
 export function loadSources(): StoreData {
   return readStore();
 }

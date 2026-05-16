@@ -273,7 +273,7 @@ ipcMain.handle("fetch-og", async (_e, url: string) => {
 
 // --- Source management (Obsidian / Logseq) ---
 
-import { loadSources, saveSource, removeSource, updateSourceConfig, syncSource, getSyncFrequency, setSyncFrequency, getHotkey, setHotkey as storeHotkey, getCloseToTray, setCloseToTray as storeCloseToTray } from "./sync.js";
+import { loadSources, saveSource, removeSource, updateSourceConfig, syncSource, getSyncFrequency, setSyncFrequency, getHotkey, setHotkey as storeHotkey, getCloseToTray, setCloseToTray as storeCloseToTray, detectObsidianVaults, detectLogseqGraphs } from "./sync.js";
 
 let syncTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -294,6 +294,10 @@ function startSyncTimer() {
     }
   }, ms);
 }
+
+ipcMain.handle("detect-vaults", () => {
+  return { obsidian: detectObsidianVaults(), logseq: detectLogseqGraphs() };
+});
 
 ipcMain.handle("select-folder", async () => {
   const parent = popup ?? win;
