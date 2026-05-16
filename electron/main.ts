@@ -1,4 +1,4 @@
-import { app, BrowserWindow, globalShortcut, ipcMain, screen, shell } from "electron";
+import { app, BrowserWindow, clipboard, globalShortcut, ipcMain, screen, shell } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
@@ -19,21 +19,28 @@ function runAppleScript(script: string): Promise<string> {
   });
 }
 
-async function getSystemContext(): Promise<{ selectedText: string; chromeUrl: string; frontApp: string }> {
+function delay(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+async function getSelectedText(): Promise<string> {
+  if (process.platform !== "darwin") return "";
+  const saved = clipboard.readText();
+  clipboard.writeText("");
+  await runAppleScript(`tell application "System Events" to keystroke "c" using command down`);
+  await delay(80);
+  const selected = clipboard.readText();
+  clipboard.writeText(saved);
+  return selected;
+}
+
+async function getSystemContext(): Promise<{ selectedText: string; chromeUrl: string }> {
   const frontApp = await runAppleScript(`
     tell application "System Events" to return name of first application process whose frontmost is true
   `);
 
   const [selectedText, chromeUrl] = await Promise.all([
-    runAppleScript(`
-      try
-        tell application "System Events"
-          return value of attribute "AXSelectedText" of focused UI element of application process "${frontApp}"
-        end tell
-      on error
-        return ""
-      end try
-    `),
+    getSelectedText(),
     frontApp === "Google Chrome" ? runAppleScript(`
       try
         tell application "Google Chrome" to return URL of active tab of front window
@@ -42,7 +49,7 @@ async function getSystemContext(): Promise<{ selectedText: string; chromeUrl: st
       end try
     `) : Promise.resolve(""),
   ]);
-  return { selectedText, chromeUrl, frontApp };
+  return { selectedText, chromeUrl };
 }
 
 function registerHotkey(accelerator: string) {
