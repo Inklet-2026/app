@@ -1,6 +1,5 @@
 import { app, BrowserWindow, clipboard, dialog, globalShortcut, ipcMain, screen, shell } from "electron";
 import path from "node:path";
-import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
 
@@ -258,28 +257,26 @@ ipcMain.handle("fetch-og", async (_e, url: string) => {
 
 // --- Source management (Obsidian / Logseq) ---
 
-interface SourceConfig {
-  path: string;
-  autoSyncNew: boolean;
-}
+import { loadSources, saveSource, removeSource, updateSourceConfig, syncSource, getSyncFrequency, setSyncFrequency } from "./sync.js";
 
-const sourcesStore: Record<string, SourceConfig> = {};
+let syncTimer: ReturnType<typeof setInterval> | null = null;
 
-function countMarkdownFiles(dir: string): number {
-  try {
-    let count = 0;
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
-    for (const entry of entries) {
-      if (entry.name.startsWith(".")) continue;
-      const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        count += countMarkdownFiles(full);
-      } else if (entry.name.endsWith(".md")) {
-        count++;
+function startSyncTimer() {
+  if (syncTimer) clearInterval(syncTimer);
+  const freq = getSyncFrequency();
+  if (freq === "Manual") return;
+  const ms = { "12h": 43200000, "1d": 86400000, "1w": 604800000 }[freq];
+  if (!ms) return;
+  syncTimer = setInterval(() => {
+    const store = loadSources();
+    for (const type of Object.keys(store.sources)) {
+      const result = syncSource(type);
+      if (result) {
+        const { diff } = result;
+        console.log(`[sync:${type}] +${diff.added.length} ~${diff.modified.length} -${diff.deleted.length}`);
       }
     }
-    return count;
-  } catch { return 0; }
+  }, ms);
 }
 
 ipcMain.handle("select-folder", async () => {
@@ -293,40 +290,73 @@ ipcMain.handle("select-folder", async () => {
 });
 
 ipcMain.handle("connect-source", (_e, type: string, folderPath: string) => {
-  const total = countMarkdownFiles(folderPath);
-  sourcesStore[type] = { path: folderPath, autoSyncNew: true };
-  return { totalDocs: total, syncedDocs: total, syncing: false };
+  const state = saveSource(type, folderPath);
+  return { totalDocs: state.files.length, syncedDocs: state.files.length, syncing: false };
 });
 
 ipcMain.on("disconnect-source", (_e, type: string) => {
-  delete sourcesStore[type];
+  removeSource(type);
 });
 
-ipcMain.on("update-source-config", (_e, type: string, config: Partial<SourceConfig>) => {
-  if (sourcesStore[type]) Object.assign(sourcesStore[type], config);
+ipcMain.on("update-source-config", (_e, type: string, config: Record<string, any>) => {
+  updateSourceConfig(type, config);
 });
 
 ipcMain.handle("get-sources", () => {
+  const store = loadSources();
   const result: Record<string, any> = { obsidian: null, logseq: null };
-  for (const [type, cfg] of Object.entries(sourcesStore)) {
-    const total = countMarkdownFiles(cfg.path);
+  for (const [type, state] of Object.entries(store.sources)) {
     result[type] = {
-      path: cfg.path,
-      name: cfg.path.split("/").pop() || type,
-      totalDocs: total,
-      syncedDocs: total,
-      autoSyncNew: cfg.autoSyncNew,
+      path: state.path,
+      name: state.name,
+      totalDocs: state.files.length,
+      syncedDocs: state.files.length,
+      autoSyncNew: state.autoSyncNew,
       syncing: false,
+      lastSynced: state.lastSynced,
     };
   }
   return result;
 });
 
+ipcMain.handle("sync-now", (_e, type: string) => {
+  const result = syncSource(type);
+  if (!result) return null;
+  const { diff, contents } = result;
+  console.log(`[sync:${type}] +${diff.added.length} ~${diff.modified.length} -${diff.deleted.length}`);
+  console.log(`[sync:${type}] payload: ${Object.keys(contents).length} files, ${JSON.stringify(contents).length} bytes`);
+  return { added: diff.added.length, modified: diff.modified.length, deleted: diff.deleted.length };
+});
+
+ipcMain.handle("sync-all", () => {
+  const store = loadSources();
+  const results: Record<string, any> = {};
+  for (const type of Object.keys(store.sources)) {
+    const result = syncSource(type);
+    if (result) {
+      const { diff } = result;
+      results[type] = { added: diff.added.length, modified: diff.modified.length, deleted: diff.deleted.length };
+      console.log(`[sync:${type}] +${diff.added.length} ~${diff.modified.length} -${diff.deleted.length}`);
+    }
+  }
+  return results;
+});
+
+ipcMain.on("set-sync-frequency", (_e, freq: string) => {
+  setSyncFrequency(freq);
+  startSyncTimer();
+});
+
+ipcMain.handle("get-sync-frequency", () => getSyncFrequency());
+
 ipcMain.on("show-sources-popup", (_e, { x, y }: { x: number; y: number }) => {
   showPopup("sources", 260, 200, x, y);
 });
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
+  startSyncTimer();
+});
 
 app.on("will-quit", () => {
   globalShortcut.unregisterAll();

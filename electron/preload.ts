@@ -57,6 +57,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
   disconnectSource: (type: string) => ipcRenderer.send("disconnect-source", type),
   updateSourceConfig: (type: string, config: any) => ipcRenderer.send("update-source-config", type, config),
   getSources: () => ipcRenderer.invoke("get-sources"),
+  syncNow: (type: string) => ipcRenderer.invoke("sync-now", type),
+  syncAll: () => ipcRenderer.invoke("sync-all"),
+  setSyncFrequency: (freq: string) => ipcRenderer.send("set-sync-frequency", freq),
+  getSyncFrequency: () => ipcRenderer.invoke("get-sync-frequency"),
   resizeSelf: (width: number, height: number) => {
     ipcRenderer.send("resize-self", { width, height });
   },

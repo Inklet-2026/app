@@ -130,6 +130,16 @@ const SYNC_OPTIONS = ["Manual", "12h", "1d", "1w"];
 
 function SyncFrequency() {
   const [freq, setFreq] = useState("1d");
+
+  useEffect(() => {
+    (window as any).electronAPI?.getSyncFrequency?.().then((f: string) => { if (f) setFreq(f); });
+  }, []);
+
+  function handleChange(f: string) {
+    setFreq(f);
+    (window as any).electronAPI?.setSyncFrequency(f);
+  }
+
   return (
     <div style={{ padding: "4px 8px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
       <span style={{ fontSize: 11, color: "var(--text)" }}>Sync</span>
@@ -137,7 +147,7 @@ function SyncFrequency() {
         {SYNC_OPTIONS.map((o) => (
           <button
             key={o}
-            onClick={() => setFreq(o)}
+            onClick={() => handleChange(o)}
             style={{
               fontSize: 10, padding: "3px 7px", border: "none", cursor: "pointer",
               background: freq === o ? "var(--accent)" : "transparent",
@@ -155,13 +165,14 @@ function SyncFrequency() {
 function SyncButton() {
   const [state, setState] = useState<"idle" | "syncing" | "done">("idle");
 
-  function handleSync() {
+  async function handleSync() {
     if (state !== "idle") return;
     setState("syncing");
-    setTimeout(() => {
-      setState("done");
-      setTimeout(() => setState("idle"), 1200);
-    }, 800);
+    try {
+      await (window as any).electronAPI?.syncAll();
+    } catch { /* ignore */ }
+    setState("done");
+    setTimeout(() => setState("idle"), 1200);
   }
 
   return (
