@@ -220,8 +220,6 @@ export default function SourcesPopup() {
       <SourceRow name="Notion" icon={<SiNotion />} config={null} comingSoon />
       <SourceRow name="Craft" icon={<TbBrandCraft />} config={null} comingSoon />
 
-      <div style={{ height: 1, background: "var(--border)", margin: "4px 6px" }} />
-
       <SyncFrequency />
     </div>
   );
