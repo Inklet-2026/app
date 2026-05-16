@@ -48,7 +48,6 @@ export default function ManualPopup() {
       padding: 6,
       height: "100vh",
       overflow: "hidden",
-      border: "1px solid var(--border)",
     }}>
       <p style={{
         fontSize: 10, color: "var(--text-muted)",

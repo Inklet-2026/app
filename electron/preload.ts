@@ -64,6 +64,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   resizeSelf: (width: number, height: number) => {
     ipcRenderer.send("resize-self", { width, height });
   },
+  resizePopup: (height: number) => {
+    ipcRenderer.send("resize-popup", { height });
+  },
   onSystemContext: (cb: (ctx: { selectedText: string; browserUrl: string }) => void) => {
     ipcRenderer.on("system-context", (_e, ctx) => cb(ctx));
   },

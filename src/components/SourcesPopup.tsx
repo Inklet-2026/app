@@ -226,7 +226,7 @@ export default function SourcesPopup() {
 
   useEffect(() => {
     const h = H_BASE + expandedCount * H_EXPANDED;
-    (window as any).electronAPI?.resizeSelf(260, h);
+    (window as any).electronAPI?.resizePopup(h);
   }, [expandedCount]);
 
   async function connectSource(type: "obsidian" | "logseq") {
@@ -245,7 +245,6 @@ export default function SourcesPopup() {
     <div style={{
       background: "var(--bg)", borderRadius: 12, padding: "8px 6px",
       display: "flex", flexDirection: "column",
-      border: "1px solid var(--border)",
     }}>
       <div style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",

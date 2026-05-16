@@ -133,7 +133,17 @@ ipcMain.on("resize-window", (_e, { width, height }: { width: number; height: num
 
 ipcMain.on("resize-self", (e, { width, height }: { width: number; height: number }) => {
   const sender = BrowserWindow.fromWebContents(e.sender);
-  if (sender) sender.setSize(width, height, false);
+  if (sender && !sender.isDestroyed()) {
+    const [w] = sender.getSize();
+    sender.setSize(width || w, Math.round(height), false);
+  }
+});
+
+ipcMain.on("resize-popup", (_e, { height }: { height: number }) => {
+  if (popup && !popup.isDestroyed()) {
+    const [w] = popup.getSize();
+    popup.setSize(w, Math.round(height), false);
+  }
 });
 
 ipcMain.on("show-manual-popup", (_e, { x, y, deviceId, duration }: { x: number; y: number; deviceId: string | null; duration: string }) => {

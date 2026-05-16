@@ -69,7 +69,6 @@ export default function SettingsPopup() {
     <div style={{
       background: "var(--bg)", borderRadius: 12, padding: "8px 10px",
       height: "100vh", display: "flex", flexDirection: "column",
-      border: "1px solid var(--border)",
     }}>
       <p style={{
         fontSize: 10, color: "var(--text-muted)", padding: "2px 6px 2px", margin: 0,

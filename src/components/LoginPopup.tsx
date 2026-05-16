@@ -13,7 +13,6 @@ export default function LoginPopup() {
     <div style={{
       background: "var(--bg)", borderRadius: 12, padding: 20,
       height: "100vh", display: "flex", flexDirection: "column",
-      border: "1px solid var(--border)",
     }}>
       <p style={{
         fontFamily: "var(--font-serif)", fontSize: 16, fontWeight: 400,
