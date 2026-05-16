@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 
 function formatAccelerator(a: string): React.ReactNode {
-  const parts = a.split("+").map((p) => {
+  const parts = a.split("+").map((p, i) => {
     const symbols: Record<string, string> = { CommandOrControl: "⌘", Shift: "⇧", Alt: "⌥", Control: "⌃" };
-    if (symbols[p]) return <span key={p} style={{ fontSize: 15 }}>{symbols[p]}</span>;
-    return <span key={p}>{p}</span>;
+    if (symbols[p]) return <span key={i} style={{ fontSize: 14, lineHeight: 1 }}>{symbols[p]} </span>;
+    return <span key={i} style={{ fontSize: 11, lineHeight: 1 }}>{p} </span>;
   });
-  return <>{parts.map((p, i) => <span key={i}>{p}{" "}</span>)}</>;
+  return <span style={{ display: "inline-flex", alignItems: "center", gap: 1 }}>{parts}</span>;
 }
 
 function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
@@ -121,7 +121,8 @@ export default function SettingsPopup() {
       >
         <span style={{ fontSize: 12, color: "var(--text)" }}>Manage account</span>
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ color: "var(--text-muted)" }}>
-          <path d="M4 2l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M4.5 1.5H10.5V7.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M10.5 1.5L4 8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
         </svg>
       </button>
 
