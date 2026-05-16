@@ -4,6 +4,7 @@ import InputBox from "./components/InputBox";
 import ManualPopup from "./components/ManualPopup";
 import LoginPopup from "./components/LoginPopup";
 import SettingsPopup from "./components/SettingsPopup";
+import SourcesPopup from "./components/SourcesPopup";
 
 export default function App() {
   const params = new URLSearchParams(window.location.search);
@@ -12,6 +13,7 @@ export default function App() {
   if (popupType === "manual") return <ManualPopup />;
   if (popupType === "login") return <LoginPopup />;
   if (popupType === "settings") return <SettingsPopup />;
+  if (popupType === "sources") return <SourcesPopup />;
 
   return <MainApp />;
 }

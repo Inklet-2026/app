@@ -49,6 +49,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.send("set-open-at-login", value);
   },
   getOpenAtLogin: () => ipcRenderer.invoke("get-open-at-login"),
+  showSourcesPopup: (x: number, y: number) => {
+    ipcRenderer.send("show-sources-popup", { x, y });
+  },
+  selectFolder: () => ipcRenderer.invoke("select-folder"),
+  connectSource: (type: string, folderPath: string) => ipcRenderer.invoke("connect-source", type, folderPath),
+  disconnectSource: (type: string) => ipcRenderer.send("disconnect-source", type),
+  updateSourceConfig: (type: string, config: any) => ipcRenderer.send("update-source-config", type, config),
+  getSources: () => ipcRenderer.invoke("get-sources"),
   onSystemContext: (cb: (ctx: { selectedText: string; browserUrl: string }) => void) => {
     ipcRenderer.on("system-context", (_e, ctx) => cb(ctx));
   },

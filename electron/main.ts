@@ -1,5 +1,6 @@
-import { app, BrowserWindow, clipboard, globalShortcut, ipcMain, screen, shell } from "electron";
+import { app, BrowserWindow, clipboard, dialog, globalShortcut, ipcMain, screen, shell } from "electron";
 import path from "node:path";
+import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
 
@@ -251,6 +252,76 @@ ipcMain.handle("fetch-og", async (_e, url: string) => {
     const hostname = new URL(url).hostname;
     return { title: hostname, description: "", image: null, url, hostname };
   }
+});
+
+// --- Source management (Obsidian / Logseq) ---
+
+interface SourceConfig {
+  path: string;
+  autoSyncNew: boolean;
+}
+
+const sourcesStore: Record<string, SourceConfig> = {};
+
+function countMarkdownFiles(dir: string): number {
+  try {
+    let count = 0;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.name.startsWith(".")) continue;
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        count += countMarkdownFiles(full);
+      } else if (entry.name.endsWith(".md")) {
+        count++;
+      }
+    }
+    return count;
+  } catch { return 0; }
+}
+
+ipcMain.handle("select-folder", async () => {
+  if (!win) return null;
+  const result = await dialog.showOpenDialog(win, {
+    properties: ["openDirectory"],
+    message: "Select vault or graph folder",
+  });
+  if (result.canceled || !result.filePaths[0]) return null;
+  return result.filePaths[0];
+});
+
+ipcMain.handle("connect-source", (_e, type: string, folderPath: string) => {
+  const total = countMarkdownFiles(folderPath);
+  sourcesStore[type] = { path: folderPath, autoSyncNew: true };
+  return { totalDocs: total, syncedDocs: total, syncing: false };
+});
+
+ipcMain.on("disconnect-source", (_e, type: string) => {
+  delete sourcesStore[type];
+});
+
+ipcMain.on("update-source-config", (_e, type: string, config: Partial<SourceConfig>) => {
+  if (sourcesStore[type]) Object.assign(sourcesStore[type], config);
+});
+
+ipcMain.handle("get-sources", () => {
+  const result: Record<string, any> = { obsidian: null, logseq: null };
+  for (const [type, cfg] of Object.entries(sourcesStore)) {
+    const total = countMarkdownFiles(cfg.path);
+    result[type] = {
+      path: cfg.path,
+      name: cfg.path.split("/").pop() || type,
+      totalDocs: total,
+      syncedDocs: total,
+      autoSyncNew: cfg.autoSyncNew,
+      syncing: false,
+    };
+  }
+  return result;
+});
+
+ipcMain.on("show-sources-popup", (_e, { x, y }: { x: number; y: number }) => {
+  showPopup("sources", 260, 280, x, y);
 });
 
 app.whenReady().then(createWindow);
