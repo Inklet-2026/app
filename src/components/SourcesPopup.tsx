@@ -26,7 +26,7 @@ function StatusDot({ active }: { active: boolean }) {
   );
 }
 
-function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSync, comingSoon }: {
+function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSync, onExpandChange, comingSoon }: {
   name: string;
   icon: React.ReactNode;
   config: VaultConfig | null;
@@ -85,9 +85,23 @@ function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSy
       </button>
 
       {config && expanded && (
-        <div style={{ padding: "2px 8px 6px 30px", display: "flex", flexDirection: "column", gap: 5 }}>
-          <div style={{ fontSize: 11, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
-            {config.path}
+        <div style={{ padding: "2px 8px 6px 30px", display: "flex", flexDirection: "column", gap: 4 }}>
+          {/* Path + disconnect on same row */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6 }}>
+            <span style={{
+              fontSize: 10, color: "var(--text-muted)", flex: 1, minWidth: 0,
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const,
+              direction: "rtl" as const, textAlign: "left" as const,
+            }}>
+              {config.path}
+            </span>
+            <button onClick={onDisconnect} style={{
+              fontSize: 10, color: "#8B4444", background: "none",
+              border: "none", cursor: "pointer", fontFamily: "var(--font-sans)",
+              padding: 0, flexShrink: 0,
+            }}>
+              Disconnect
+            </button>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -118,14 +132,6 @@ function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSy
             onMouseLeave={(e) => e.currentTarget.style.background = "var(--bg-input)"}
           >
             Select documents...
-          </button>
-
-          <button onClick={onDisconnect} style={{
-            fontSize: 10, color: "#8B4444", background: "none",
-            border: "none", cursor: "pointer", fontFamily: "var(--font-sans)",
-            padding: "2px 0", textAlign: "left",
-          }}>
-            Disconnect
           </button>
         </div>
       )}
