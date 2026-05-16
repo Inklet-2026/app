@@ -65,10 +65,10 @@ function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSy
       >
         <span style={{ fontSize: 14, display: "flex" }}>{icon}</span>
         <span style={{ fontSize: 12, color: "var(--text)", flex: 1 }}>{name}</span>
-        <StatusDot active={!!config} />
         <span style={{ fontSize: 10, color: "var(--text-muted)" }}>
           {config ? `${config.syncedDocs}/${config.totalDocs}` : "connect"}
         </span>
+        <StatusDot active={!!config} />
         {config && (
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none"
             style={{ transform: expanded ? "rotate(90deg)" : "none", transition: "transform 150ms", color: "var(--text-muted)" }}>

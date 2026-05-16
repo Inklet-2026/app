@@ -131,7 +131,7 @@ ipcMain.on("resize-window", (_e, { width, height }: { width: number; height: num
 
 ipcMain.on("resize-self", (e, { width, height }: { width: number; height: number }) => {
   const sender = BrowserWindow.fromWebContents(e.sender);
-  if (sender) sender.setSize(width, height, true);
+  if (sender) sender.setSize(width, height, false);
 });
 
 ipcMain.on("show-manual-popup", (_e, { x, y, deviceId, duration }: { x: number; y: number; deviceId: string | null; duration: string }) => {
