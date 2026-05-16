@@ -217,8 +217,8 @@ function SyncButton() {
   );
 }
 
-const H_BASE = 198 + 4 * 30;
-const H_EXPANDED = 76;
+const H_BASE = 198;
+const H_EXPANDED = 75.5;
 
 export default function SourcesPopup() {
   const [sources, setSources] = useState<SourceState>({ obsidian: null, logseq: null });
@@ -296,11 +296,6 @@ export default function SourcesPopup() {
         }}
         onExpandChange={(exp) => setExpandedCount((c) => c + (exp ? 1 : -1))}
       />
-
-      <SourceRow name="Obsidian 2" icon={<SiObsidian />} config={sources.obsidian} onConnect={() => connectSource("obsidian")} onExpandChange={(exp) => setExpandedCount((c) => c + (exp ? 1 : -1))} />
-      <SourceRow name="Obsidian 3" icon={<SiObsidian />} config={sources.obsidian} onConnect={() => connectSource("obsidian")} onExpandChange={(exp) => setExpandedCount((c) => c + (exp ? 1 : -1))} />
-      <SourceRow name="Obsidian 4" icon={<SiObsidian />} config={sources.obsidian} onConnect={() => connectSource("obsidian")} onExpandChange={(exp) => setExpandedCount((c) => c + (exp ? 1 : -1))} />
-      <SourceRow name="Obsidian 5" icon={<SiObsidian />} config={sources.obsidian} onConnect={() => connectSource("obsidian")} onExpandChange={(exp) => setExpandedCount((c) => c + (exp ? 1 : -1))} />
 
       <SourceRow name="Notion" icon={<SiNotion />} config={null} comingSoon />
       <SourceRow name="Craft" icon={<TbBrandCraft />} config={null} comingSoon />
