@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, screen } from "electron";
+import { app, BrowserWindow, ipcMain, screen, shell } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -38,49 +38,7 @@ ipcMain.on("resize-window", (_e, { width, height }: { width: number; height: num
 });
 
 ipcMain.on("show-manual-popup", (_e, { x, y, deviceId, duration }: { x: number; y: number; deviceId: string | null; duration: string }) => {
-  if (popup) { popup.close(); popup = null; }
-
-  const display = screen.getDisplayNearestPoint({ x, y });
-  const popupWidth = 200;
-  const popupHeight = 240;
-  let px = Math.round(x - popupWidth);
-  let py = Math.round(y + 8);
-  if (py + popupHeight > display.workArea.y + display.workArea.height) {
-    py = Math.round(y - popupHeight - 8);
-  }
-
-  popup = new BrowserWindow({
-    width: popupWidth,
-    height: popupHeight,
-    x: px,
-    y: py,
-    frame: false,
-    transparent: true,
-    hasShadow: true,
-    alwaysOnTop: true,
-    resizable: false,
-    skipTaskbar: true,
-    focusable: true,
-    webPreferences: {
-      preload: path.join(__dirname, "preload.mjs"),
-      contextIsolation: true,
-      nodeIntegration: false,
-    },
-  });
-
-  const params = new URLSearchParams({ popup: "manual", deviceId: deviceId ?? "", duration });
-  if (process.env.VITE_DEV_SERVER_URL) {
-    popup.loadURL(`${process.env.VITE_DEV_SERVER_URL}?${params}`);
-  } else {
-    popup.loadFile(path.join(__dirname, "../dist/index.html"), { search: params.toString() });
-  }
-
-  popup.on("blur", () => {
-    if (popup && !popup.isDestroyed()) { popup.close(); popup = null; }
-    if (win) win.webContents.send("manual-popup-closed");
-  });
-
-  popup.on("closed", () => { popup = null; });
+  showPopup("manual", 200, 237, x, y, { deviceId: deviceId ?? "", duration });
 });
 
 ipcMain.on("close-manual-popup", () => {
@@ -90,6 +48,53 @@ ipcMain.on("close-manual-popup", () => {
 ipcMain.on("manual-selection", (_e, data: { deviceId: string; duration: string }) => {
   if (win) win.webContents.send("manual-selection", data);
   if (popup && !popup.isDestroyed()) { popup.close(); popup = null; }
+});
+
+function showPopup(type: string, w: number, h: number, anchorX: number, anchorY: number, extraParams?: Record<string, string>) {
+  if (popup && !popup.isDestroyed()) { popup.close(); popup = null; }
+  const display = screen.getDisplayNearestPoint({ x: anchorX, y: anchorY });
+  let px = Math.round(anchorX - w);
+  let py = Math.round(anchorY + 8);
+  if (py + h > display.workArea.y + display.workArea.height) py = Math.round(anchorY - h - 8);
+
+  popup = new BrowserWindow({
+    width: w, height: h, x: px, y: py,
+    frame: false, transparent: true, hasShadow: true,
+    alwaysOnTop: true, resizable: false, skipTaskbar: true, focusable: true,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.mjs"),
+      contextIsolation: true, nodeIntegration: false,
+    },
+  });
+
+  const params = new URLSearchParams({ popup: type, ...extraParams });
+  if (process.env.VITE_DEV_SERVER_URL) {
+    popup.loadURL(`${process.env.VITE_DEV_SERVER_URL}?${params}`);
+  } else {
+    popup.loadFile(path.join(__dirname, "../dist/index.html"), { search: params.toString() });
+  }
+
+  popup.on("blur", () => {
+    if (popup && !popup.isDestroyed()) { popup.close(); popup = null; }
+  });
+  popup.on("closed", () => { popup = null; });
+}
+
+ipcMain.on("show-login-popup", (_e, { x, y }: { x: number; y: number }) => {
+  showPopup("login", 260, 210, x, y);
+});
+
+ipcMain.on("show-settings-popup", (_e, { x, y }: { x: number; y: number }) => {
+  showPopup("settings", 220, 160, x, y);
+});
+
+ipcMain.on("login-success", (_e, data: { username: string }) => {
+  if (win) win.webContents.send("login-success", data);
+  if (popup && !popup.isDestroyed()) { popup.close(); popup = null; }
+});
+
+ipcMain.on("open-external", (_e, url: string) => {
+  shell.openExternal(url);
 });
 
 ipcMain.handle("fetch-og", async (_e, url: string) => {

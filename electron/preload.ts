@@ -21,4 +21,19 @@ contextBridge.exposeInMainWorld("electronAPI", {
   onManualPopupClosed: (cb: () => void) => {
     ipcRenderer.on("manual-popup-closed", () => cb());
   },
+  showLoginPopup: (x: number, y: number) => {
+    ipcRenderer.send("show-login-popup", { x, y });
+  },
+  showSettingsPopup: (x: number, y: number) => {
+    ipcRenderer.send("show-settings-popup", { x, y });
+  },
+  sendLogin: (username: string) => {
+    ipcRenderer.send("login-success", { username });
+  },
+  onLoginSuccess: (cb: (data: { username: string }) => void) => {
+    ipcRenderer.on("login-success", (_e, data) => cb(data));
+  },
+  openExternal: (url: string) => {
+    ipcRenderer.send("open-external", url);
+  },
 });

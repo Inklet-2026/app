@@ -34,7 +34,7 @@ function ToolBtn({ onClick, title, children }: { onClick: () => void; title: str
   );
 }
 
-export default function InputBox() {
+export default function InputBox({ disabled, onLoginClick }: { disabled?: boolean; onLoginClick?: (x: number, y: number) => void }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -151,8 +151,32 @@ export default function InputBox() {
       <div style={{
         background: "var(--bg-input)", border: "1px solid var(--border)",
         borderRadius: 12, display: "flex", flexDirection: "column",
-        flexShrink: 0,
+        flexShrink: 0, position: "relative",
       }}>
+        {disabled && (
+          <div
+            onClick={(e) => {
+              if (onLoginClick) {
+                const sx = window.screenX || 0;
+                const sy = window.screenY || 0;
+                onLoginClick(sx + e.clientX, sy + e.clientY);
+              }
+            }}
+            style={{
+              position: "absolute", inset: 0, borderRadius: 12, zIndex: 10,
+              background: "rgba(245,243,237,0.85)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer",
+            }}
+          >
+            <span style={{ fontSize: 13, color: "var(--text-muted)" }}>
+              <span
+                style={{ color: "var(--text-secondary)", textDecoration: "underline", cursor: "pointer" }}
+              >Login</span>
+              {" "}to continue
+            </span>
+          </div>
+        )}
         <div style={{ padding: "12px 14px 0", minHeight: 0 }}>
           <textarea
             ref={textareaRef}
