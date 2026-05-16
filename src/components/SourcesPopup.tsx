@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { SiObsidian, SiLogseq, SiNotion, SiCraft } from "react-icons/si";
+import { SiObsidian, SiLogseq, SiNotion } from "react-icons/si";
+import { HiOutlinePencilSquare } from "react-icons/hi2";
 
 interface VaultConfig {
   path: string;
@@ -200,7 +201,7 @@ export default function SourcesPopup() {
       <div style={{ height: 1, background: "var(--border)", margin: "3px 6px" }} />
 
       <SourceRow name="Notion" icon={<SiNotion />} config={null} comingSoon />
-      <SourceRow name="Craft" icon={<SiCraft />} config={null} comingSoon />
+      <SourceRow name="Craft" icon={<HiOutlinePencilSquare />} config={null} comingSoon />
     </div>
   );
 }
