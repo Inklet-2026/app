@@ -126,6 +126,32 @@ function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSy
   );
 }
 
+const SYNC_OPTIONS = ["Manual", "12h", "1d", "1w"];
+
+function SyncFrequency() {
+  const [freq, setFreq] = useState("1d");
+  return (
+    <div style={{ padding: "4px 8px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <span style={{ fontSize: 11, color: "var(--text)" }}>Sync</span>
+      <div style={{ display: "flex", gap: 2, borderRadius: 6, overflow: "hidden", border: "1px solid var(--border)" }}>
+        {SYNC_OPTIONS.map((o) => (
+          <button
+            key={o}
+            onClick={() => setFreq(o)}
+            style={{
+              fontSize: 10, padding: "3px 7px", border: "none", cursor: "pointer",
+              background: freq === o ? "var(--accent)" : "transparent",
+              color: freq === o ? "var(--bg)" : "var(--text-muted)",
+              fontFamily: "var(--font-sans)", fontWeight: freq === o ? 500 : 400,
+              transition: "all 100ms",
+            }}
+          >{o}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function SourcesPopup() {
   const [sources, setSources] = useState<SourceState>({ obsidian: null, logseq: null });
 
@@ -195,6 +221,10 @@ export default function SourcesPopup() {
 
       <SourceRow name="Notion" icon={<SiNotion />} config={null} comingSoon />
       <SourceRow name="Craft" icon={<TbBrandCraft />} config={null} comingSoon />
+
+      <div style={{ height: 1, background: "var(--border)", margin: "3px 6px" }} />
+
+      <SyncFrequency />
     </div>
   );
 }
