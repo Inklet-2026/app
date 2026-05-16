@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 
-function formatAccelerator(a: string): string {
-  return a.replace("CommandOrControl", "⌘").replace("Control", "Ctrl").replace("Shift", "⇧").replace("Alt", "⌥").replace(/\+/g, " ");
+function formatAccelerator(a: string): React.ReactNode {
+  const parts = a.split("+").map((p) => {
+    const symbols: Record<string, string> = { CommandOrControl: "⌘", Shift: "⇧", Alt: "⌥", Control: "⌃" };
+    if (symbols[p]) return <span key={p} style={{ fontSize: 15 }}>{symbols[p]}</span>;
+    return <span key={p}>{p}</span>;
+  });
+  return <>{parts.map((p, i) => <span key={i}>{p}{" "}</span>)}</>;
 }
 
 function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
@@ -78,7 +83,7 @@ export default function SettingsPopup() {
         <button
           onClick={() => setRecording(true)}
           style={{
-            fontSize: 13, color: recording ? "var(--accent)" : "var(--text-muted)",
+            fontSize: 11, color: recording ? "var(--accent)" : "var(--text-muted)",
             background: "var(--bg-input)", border: "1px solid var(--border)",
             padding: "2px 8px", borderRadius: 4, fontFamily: "monospace",
             cursor: "pointer", minWidth: 50, textAlign: "center",

@@ -33,9 +33,16 @@ function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSy
   onConnect?: () => void;
   onDisconnect?: () => void;
   onToggleAutoSync?: (v: boolean) => void;
+  onExpandChange?: (expanded: boolean) => void;
   comingSoon?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
+
+  function toggleExpand() {
+    const next = !expanded;
+    setExpanded(next);
+    onExpandChange?.(next);
+  }
 
   if (comingSoon) {
     return (
@@ -53,7 +60,7 @@ function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSy
   return (
     <div>
       <button
-        onClick={() => config ? setExpanded(!expanded) : onConnect?.()}
+        onClick={() => config ? toggleExpand() : onConnect?.()}
         style={{
           width: "100%", padding: "7px 8px", display: "flex", alignItems: "center", gap: 8,
           background: "none", border: "none", cursor: "pointer",
@@ -204,8 +211,12 @@ function SyncButton() {
   );
 }
 
+const H_BASE = 170;
+const H_EXPANDED = 110;
+
 export default function SourcesPopup() {
   const [sources, setSources] = useState<SourceState>({ obsidian: null, logseq: null });
+  const [expandedCount, setExpandedCount] = useState(0);
 
   useEffect(() => {
     (window as any).electronAPI?.getSources?.().then((s: SourceState) => {
@@ -214,14 +225,9 @@ export default function SourcesPopup() {
   }, []);
 
   useEffect(() => {
-    document.documentElement.style.height = "auto";
-    document.body.style.height = "auto";
-    document.getElementById("root")!.style.height = "auto";
-    requestAnimationFrame(() => {
-      const h = Math.min(document.body.scrollHeight, 400);
-      (window as any).electronAPI?.resizeSelf(260, h);
-    });
-  });
+    const h = H_BASE + expandedCount * H_EXPANDED;
+    (window as any).electronAPI?.resizeSelf(260, h);
+  }, [expandedCount]);
 
   async function connectSource(type: "obsidian" | "logseq") {
     const result = await (window as any).electronAPI?.selectFolder();
@@ -267,6 +273,7 @@ export default function SourcesPopup() {
             (window as any).electronAPI?.updateSourceConfig("obsidian", { autoSyncNew: v });
           }
         }}
+        onExpandChange={(exp) => setExpandedCount((c) => c + (exp ? 1 : -1))}
       />
 
       <SourceRow
@@ -282,6 +289,7 @@ export default function SourcesPopup() {
             (window as any).electronAPI?.updateSourceConfig("logseq", { autoSyncNew: v });
           }
         }}
+        onExpandChange={(exp) => setExpandedCount((c) => c + (exp ? 1 : -1))}
       />
 
       <SourceRow name="Notion" icon={<SiNotion />} config={null} comingSoon />
