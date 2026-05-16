@@ -85,7 +85,7 @@ export default function SettingsPopup() {
             fontSize: 11, color: recording ? "var(--accent)" : "var(--text-muted)",
             background: "var(--bg-input)", border: "1px solid var(--border)",
             padding: "2px 8px", borderRadius: 4, fontFamily: "monospace",
-            display: "inline-flex", alignItems: "center",
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
             cursor: "pointer", minWidth: 50, textAlign: "center",
           }}
         >
