@@ -26,7 +26,7 @@ function StatusDot({ active }: { active: boolean }) {
   );
 }
 
-function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSync, onExpandChange, comingSoon }: {
+function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSync, onExpandChange, autoExpand, comingSoon }: {
   name: string;
   icon: React.ReactNode;
   config: VaultConfig | null;
@@ -34,9 +34,17 @@ function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSy
   onDisconnect?: () => void;
   onToggleAutoSync?: (v: boolean) => void;
   onExpandChange?: (expanded: boolean) => void;
+  autoExpand?: boolean;
   comingSoon?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    if (autoExpand && config && !expanded) {
+      setExpanded(true);
+      onExpandChange?.(true);
+    }
+  }, [autoExpand, config]);
 
   function toggleExpand() {
     const next = !expanded;
@@ -272,6 +280,7 @@ export default function SourcesPopup() {
   const [sources, setSources] = useState<SourceState>({ obsidian: null, logseq: null });
   const [expandedCount, setExpandedCount] = useState(0);
   const [picking, setPicking] = useState<"obsidian" | "logseq" | null>(null);
+  const [justConnected, setJustConnected] = useState<"obsidian" | "logseq" | null>(null);
   const [detected, setDetected] = useState<{ obsidian: DetectedVault[]; logseq: DetectedVault[] }>({ obsidian: [], logseq: [] });
 
   useEffect(() => {
@@ -303,6 +312,7 @@ export default function SourcesPopup() {
 
   async function selectVault(type: "obsidian" | "logseq", vaultPath: string) {
     setPicking(null);
+    setJustConnected(type);
     const updated = await (window as any).electronAPI?.connectSource(type, vaultPath);
     const config: VaultConfig = {
       path: vaultPath, name: vaultPath.split("/").pop() || type,
@@ -316,6 +326,7 @@ export default function SourcesPopup() {
     setPicking(null);
     const result = await (window as any).electronAPI?.selectFolder();
     if (!result) return;
+    setJustConnected(type);
     const updated = await (window as any).electronAPI?.connectSource(type, result);
     const config: VaultConfig = {
       path: result, name: result.split("/").pop() || type,
@@ -345,6 +356,7 @@ export default function SourcesPopup() {
 
       <SourceRow
         name="Obsidian" icon={<SiObsidian />} config={sources.obsidian}
+        autoExpand={justConnected === "obsidian"}
         onConnect={() => handleConnect("obsidian")}
         onDisconnect={() => {
           (window as any).electronAPI?.disconnectSource("obsidian");
@@ -365,6 +377,7 @@ export default function SourcesPopup() {
 
       <SourceRow
         name="Logseq" icon={<SiLogseq />} config={sources.logseq}
+        autoExpand={justConnected === "logseq"}
         onConnect={() => handleConnect("logseq")}
         onDisconnect={() => {
           (window as any).electronAPI?.disconnectSource("logseq");
