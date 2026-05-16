@@ -348,6 +348,7 @@ export default function SourcesPopup() {
         onConnect={() => handleConnect("obsidian")}
         onDisconnect={() => {
           (window as any).electronAPI?.disconnectSource("obsidian");
+          setExpandedCount((c) => Math.max(0, c - 1));
           setSources((s) => ({ ...s, obsidian: null }));
         }}
         onToggleAutoSync={(v) => {
@@ -367,6 +368,7 @@ export default function SourcesPopup() {
         onConnect={() => handleConnect("logseq")}
         onDisconnect={() => {
           (window as any).electronAPI?.disconnectSource("logseq");
+          setExpandedCount((c) => Math.max(0, c - 1));
           setSources((s) => ({ ...s, logseq: null }));
         }}
         onToggleAutoSync={(v) => {
