@@ -57,6 +57,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   disconnectSource: (type: string) => ipcRenderer.send("disconnect-source", type),
   updateSourceConfig: (type: string, config: any) => ipcRenderer.send("update-source-config", type, config),
   getSources: () => ipcRenderer.invoke("get-sources"),
+  resizeSelf: (width: number, height: number) => {
+    ipcRenderer.send("resize-self", { width, height });
+  },
   onSystemContext: (cb: (ctx: { selectedText: string; browserUrl: string }) => void) => {
     ipcRenderer.on("system-context", (_e, ctx) => cb(ctx));
   },

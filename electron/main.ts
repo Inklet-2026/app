@@ -129,6 +129,11 @@ ipcMain.on("resize-window", (_e, { width, height }: { width: number; height: num
   if (win) win.setSize(width, height, true);
 });
 
+ipcMain.on("resize-self", (e, { width, height }: { width: number; height: number }) => {
+  const sender = BrowserWindow.fromWebContents(e.sender);
+  if (sender) sender.setSize(width, height, true);
+});
+
 ipcMain.on("show-manual-popup", (_e, { x, y, deviceId, duration }: { x: number; y: number; deviceId: string | null; duration: string }) => {
   showPopup("manual", 200, 237, x, y, { deviceId: deviceId ?? "", duration });
 });

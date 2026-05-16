@@ -139,7 +139,7 @@ export default function SourcesPopup() {
   useEffect(() => {
     if (containerRef.current) {
       const h = containerRef.current.scrollHeight + 4;
-      (window as any).electronAPI?.resizeWindow(260, Math.min(h, 400));
+      (window as any).electronAPI?.resizeSelf(260, Math.min(h, 400));
     }
   });
 
