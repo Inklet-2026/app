@@ -39,6 +39,18 @@ button, a, input, textarea, select, label {
   -webkit-app-region: no-drag;
 }
 
+button:focus, a:focus {
+  outline: none;
+}
+
+button:not(textarea):not(input) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+*:focus-visible {
+  outline: none;
+}
+
 textarea, input, select {
   font-family: var(--font-sans);
 }

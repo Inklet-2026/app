@@ -224,6 +224,7 @@ export default function InputBox({ disabled, onLoginClick }: { disabled?: boolea
             value={content}
             onChange={(e) => { setContent(e.target.value); if (e.target.value) setSuggestion(""); }}
             onKeyDown={(e) => {
+              if (e.key === "Tab") e.preventDefault();
               if ((e.key === "Tab" || e.key === "ArrowRight") && !content && suggestion) {
                 e.preventDefault();
                 if (suggestionType === "url") {
