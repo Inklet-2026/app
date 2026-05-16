@@ -50,13 +50,13 @@ export default function InputBox({ disabled, onLoginClick }: { disabled?: boolea
   const [submitState, setSubmitState] = useState<"idle" | "loading" | "success">("idle");
 
   useEffect(() => {
-    (window as any).electronAPI?.onSystemContext?.((ctx: { selectedText: string; chromeUrl: string }) => {
+    (window as any).electronAPI?.onSystemContext?.((ctx: { selectedText: string; browserUrl: string }) => {
       if (content) return;
       if (ctx.selectedText) {
         setSuggestion(ctx.selectedText);
         setSuggestionType("text");
-      } else if (ctx.chromeUrl) {
-        setSuggestion(ctx.chromeUrl);
+      } else if (ctx.browserUrl) {
+        setSuggestion(ctx.browserUrl);
         setSuggestionType("url");
       }
     });

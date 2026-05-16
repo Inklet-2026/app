@@ -34,22 +34,32 @@ async function getSelectedText(): Promise<string> {
   return selected;
 }
 
-async function getSystemContext(): Promise<{ selectedText: string; chromeUrl: string }> {
+function getBrowserUrlScript(appName: string): string | null {
+  const chromium = ["Google Chrome", "Google Chrome Canary", "Chromium", "Microsoft Edge", "Brave Browser", "Vivaldi", "Arc"];
+  if (chromium.includes(appName)) {
+    return `tell application "${appName}" to return URL of active tab of front window`;
+  }
+  if (appName === "Safari") {
+    return `tell application "Safari" to return URL of front document`;
+  }
+  if (appName === "Firefox") {
+    return `tell application "System Events" to tell process "Firefox" to return value of attribute "AXValue" of text field 1 of toolbar 1 of front window`;
+  }
+  return null;
+}
+
+async function getSystemContext(): Promise<{ selectedText: string; browserUrl: string }> {
   const frontApp = await runAppleScript(`
     tell application "System Events" to return name of first application process whose frontmost is true
   `);
 
-  const [selectedText, chromeUrl] = await Promise.all([
+  const urlScript = getBrowserUrlScript(frontApp);
+
+  const [selectedText, browserUrl] = await Promise.all([
     getSelectedText(),
-    frontApp === "Google Chrome" ? runAppleScript(`
-      try
-        tell application "Google Chrome" to return URL of active tab of front window
-      on error
-        return ""
-      end try
-    `) : Promise.resolve(""),
+    urlScript ? runAppleScript(`try\n${urlScript}\non error\nreturn ""\nend try`) : Promise.resolve(""),
   ]);
-  return { selectedText, chromeUrl };
+  return { selectedText, browserUrl };
 }
 
 function registerHotkey(accelerator: string) {
@@ -64,7 +74,7 @@ function registerHotkey(accelerator: string) {
         const ctx = await getSystemContext();
         win.show();
         win.focus();
-        if (ctx.selectedText || ctx.chromeUrl) {
+        if (ctx.selectedText || ctx.browserUrl) {
           win.webContents.send("system-context", ctx);
         }
         win.webContents.send("window-shown");
