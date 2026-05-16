@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { SiObsidian, SiLogseq, SiNotion } from "react-icons/si";
 import { TbBrandCraft } from "react-icons/tb";
 
@@ -206,6 +206,7 @@ function SyncButton() {
 
 export default function SourcesPopup() {
   const [sources, setSources] = useState<SourceState>({ obsidian: null, logseq: null });
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     (window as any).electronAPI?.getSources?.().then((s: SourceState) => {
@@ -213,6 +214,16 @@ export default function SourcesPopup() {
     });
   }, []);
 
+  const autoResize = useCallback(() => {
+    if (containerRef.current) {
+      const h = Math.min(containerRef.current.scrollHeight + 4, 400);
+      (window as any).electronAPI?.resizeSelf(260, h);
+    }
+  }, []);
+
+  useEffect(() => {
+    autoResize();
+  });
 
   async function connectSource(type: "obsidian" | "logseq") {
     const result = await (window as any).electronAPI?.selectFolder();
@@ -227,9 +238,9 @@ export default function SourcesPopup() {
   }
 
   return (
-    <div style={{
+    <div ref={containerRef} style={{
       background: "var(--bg)", borderRadius: 12, padding: "8px 6px",
-      height: "100vh", display: "flex", flexDirection: "column",
+      display: "flex", flexDirection: "column",
       border: "1px solid var(--border)",
     }}>
       <div style={{
