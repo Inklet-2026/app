@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { SiObsidian, SiLogseq, SiNotion, SiCraft } from "react-icons/si";
 
 interface VaultConfig {
   path: string;
@@ -26,7 +27,7 @@ function StatusDot({ active }: { active: boolean }) {
 
 function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSync, comingSoon }: {
   name: string;
-  icon: string;
+  icon: React.ReactNode;
   config: VaultConfig | null;
   onConnect?: () => void;
   onDisconnect?: () => void;
@@ -38,10 +39,10 @@ function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSy
   if (comingSoon) {
     return (
       <div style={{
-        padding: "8px 8px", display: "flex", alignItems: "center", gap: 8,
-        opacity: 0.4,
+        padding: "7px 8px", display: "flex", alignItems: "center", gap: 8,
+        opacity: 0.35,
       }}>
-        <span style={{ fontSize: 16 }}>{icon}</span>
+        <span style={{ fontSize: 14, display: "flex" }}>{icon}</span>
         <span style={{ fontSize: 12, color: "var(--text)", flex: 1 }}>{name}</span>
         <span style={{ fontSize: 10, color: "var(--text-muted)", fontStyle: "italic" }}>coming soon</span>
       </div>
@@ -53,7 +54,7 @@ function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSy
       <button
         onClick={() => config ? setExpanded(!expanded) : onConnect?.()}
         style={{
-          width: "100%", padding: "8px 8px", display: "flex", alignItems: "center", gap: 8,
+          width: "100%", padding: "7px 8px", display: "flex", alignItems: "center", gap: 8,
           background: "none", border: "none", cursor: "pointer",
           borderRadius: 6, fontFamily: "var(--font-sans)", textAlign: "left",
           transition: "background 80ms",
@@ -61,7 +62,7 @@ function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSy
         onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-card)"}
         onMouseLeave={(e) => e.currentTarget.style.background = "none"}
       >
-        <span style={{ fontSize: 16 }}>{icon}</span>
+        <span style={{ fontSize: 14, display: "flex" }}>{icon}</span>
         <span style={{ fontSize: 12, color: "var(--text)", flex: 1 }}>{name}</span>
         <StatusDot active={!!config} />
         <span style={{ fontSize: 10, color: "var(--text-muted)" }}>
@@ -76,11 +77,9 @@ function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSy
       </button>
 
       {config && expanded && (
-        <div style={{ padding: "2px 8px 8px 32px", display: "flex", flexDirection: "column", gap: 6 }}>
-          <div style={{ fontSize: 11, color: "var(--text-muted)", display: "flex", gap: 4, alignItems: "center" }}>
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
-              {config.path}
-            </span>
+        <div style={{ padding: "2px 8px 6px 30px", display: "flex", flexDirection: "column", gap: 5 }}>
+          <div style={{ fontSize: 11, color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
+            {config.path}
           </div>
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -100,9 +99,7 @@ function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSy
           </div>
 
           <button
-            onClick={() => {
-              (window as any).electronAPI?.openSourceDocs(name.toLowerCase());
-            }}
+            onClick={() => (window as any).electronAPI?.openSourceDocs(name.toLowerCase())}
             style={{
               fontSize: 11, color: "var(--text-secondary)", background: "var(--bg-input)",
               border: "1px solid var(--border)", borderRadius: 6,
@@ -115,14 +112,11 @@ function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSy
             Select documents...
           </button>
 
-          <button
-            onClick={onDisconnect}
-            style={{
-              fontSize: 10, color: "#8B4444", background: "none",
-              border: "none", cursor: "pointer", fontFamily: "var(--font-sans)",
-              padding: "2px 0", textAlign: "left",
-            }}
-          >
+          <button onClick={onDisconnect} style={{
+            fontSize: 10, color: "#8B4444", background: "none",
+            border: "none", cursor: "pointer", fontFamily: "var(--font-sans)",
+            padding: "2px 0", textAlign: "left",
+          }}>
             Disconnect
           </button>
         </div>
@@ -133,6 +127,7 @@ function SourceRow({ name, icon, config, onConnect, onDisconnect, onToggleAutoSy
 
 export default function SourcesPopup() {
   const [sources, setSources] = useState<SourceState>({ obsidian: null, logseq: null });
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     (window as any).electronAPI?.getSources?.().then((s: SourceState) => {
@@ -140,52 +135,41 @@ export default function SourcesPopup() {
     });
   }, []);
 
-  async function connectObsidian() {
-    const result = await (window as any).electronAPI?.selectFolder();
-    if (!result) return;
-    const config: VaultConfig = {
-      path: result, name: result.split("/").pop() || "vault",
-      totalDocs: 0, syncedDocs: 0, autoSyncNew: true, syncing: false,
-    };
-    const updated = await (window as any).electronAPI?.connectSource("obsidian", result);
-    if (updated) {
-      setSources((s) => ({ ...s, obsidian: { ...config, ...updated } }));
-    } else {
-      setSources((s) => ({ ...s, obsidian: config }));
+  useEffect(() => {
+    if (containerRef.current) {
+      const h = containerRef.current.scrollHeight + 4;
+      (window as any).electronAPI?.resizeWindow(260, Math.min(h, 400));
     }
-  }
+  });
 
-  async function connectLogseq() {
+  async function connectSource(type: "obsidian" | "logseq") {
     const result = await (window as any).electronAPI?.selectFolder();
     if (!result) return;
+    const updated = await (window as any).electronAPI?.connectSource(type, result);
     const config: VaultConfig = {
-      path: result, name: result.split("/").pop() || "graph",
-      totalDocs: 0, syncedDocs: 0, autoSyncNew: true, syncing: false,
+      path: result, name: result.split("/").pop() || type,
+      totalDocs: updated?.totalDocs ?? 0, syncedDocs: updated?.syncedDocs ?? 0,
+      autoSyncNew: true, syncing: false,
     };
-    const updated = await (window as any).electronAPI?.connectSource("logseq", result);
-    if (updated) {
-      setSources((s) => ({ ...s, logseq: { ...config, ...updated } }));
-    } else {
-      setSources((s) => ({ ...s, logseq: config }));
-    }
+    setSources((s) => ({ ...s, [type]: config }));
   }
 
   return (
-    <div style={{
+    <div ref={containerRef} style={{
       background: "var(--bg)", borderRadius: 12, padding: "8px 6px",
-      height: "100vh", display: "flex", flexDirection: "column",
+      display: "flex", flexDirection: "column",
       border: "1px solid var(--border)",
     }}>
       <p style={{
-        fontSize: 10, color: "var(--text-muted)", padding: "2px 8px 4px", margin: 0,
+        fontSize: 10, color: "var(--text-muted)", padding: "2px 8px 3px", margin: 0,
         textTransform: "uppercase" as const, letterSpacing: "0.06em",
       }}>
         Sources
       </p>
 
       <SourceRow
-        name="Obsidian" icon="💎" config={sources.obsidian}
-        onConnect={connectObsidian}
+        name="Obsidian" icon={<SiObsidian />} config={sources.obsidian}
+        onConnect={() => connectSource("obsidian")}
         onDisconnect={() => {
           (window as any).electronAPI?.disconnectSource("obsidian");
           setSources((s) => ({ ...s, obsidian: null }));
@@ -199,8 +183,8 @@ export default function SourcesPopup() {
       />
 
       <SourceRow
-        name="Logseq" icon="📓" config={sources.logseq}
-        onConnect={connectLogseq}
+        name="Logseq" icon={<SiLogseq />} config={sources.logseq}
+        onConnect={() => connectSource("logseq")}
         onDisconnect={() => {
           (window as any).electronAPI?.disconnectSource("logseq");
           setSources((s) => ({ ...s, logseq: null }));
@@ -213,10 +197,10 @@ export default function SourcesPopup() {
         }}
       />
 
-      <div style={{ height: 1, background: "var(--border)", margin: "4px 6px" }} />
+      <div style={{ height: 1, background: "var(--border)", margin: "3px 6px" }} />
 
-      <SourceRow name="Notion" icon="📝" config={null} comingSoon />
-      <SourceRow name="Craft" icon="✏️" config={null} comingSoon />
+      <SourceRow name="Notion" icon={<SiNotion />} config={null} comingSoon />
+      <SourceRow name="Craft" icon={<SiCraft />} config={null} comingSoon />
     </div>
   );
 }

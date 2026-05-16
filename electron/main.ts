@@ -115,9 +115,6 @@ function createWindow() {
     }
   });
 
-  win.on("blur", () => {
-    if (win && !popup) win.hide();
-  });
 
   if (process.env.VITE_DEV_SERVER_URL) {
     win.loadURL(process.env.VITE_DEV_SERVER_URL);
