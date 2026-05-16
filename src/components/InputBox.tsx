@@ -133,10 +133,30 @@ export default function InputBox({ disabled, onLoginClick }: { disabled?: boolea
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    addAttachment({
-      id: genId(), type: "image", name: file.name,
-      preview: URL.createObjectURL(file),
-    });
+
+    const isImage = file.type.startsWith("image/");
+    const textExts = [".txt", ".md", ".csv", ".json", ".xml", ".html", ".rtf"];
+    const isText = textExts.some((ext) => file.name.toLowerCase().endsWith(ext));
+
+    if (isImage) {
+      addAttachment({
+        id: genId(), type: "image", name: file.name,
+        preview: URL.createObjectURL(file),
+      });
+    } else if (isText) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const text = (reader.result as string).slice(0, 50000);
+        setContent((c) => c + (c ? "\n\n" : "") + text);
+        textareaRef.current?.focus();
+      };
+      reader.readAsText(file);
+    } else {
+      addAttachment({
+        id: genId(), type: "clipboard", name: file.name,
+        preview: `${file.name} (${(file.size / 1024).toFixed(1)} KB)`,
+      });
+    }
     e.target.value = "";
   }
 
@@ -271,7 +291,7 @@ export default function InputBox({ disabled, onLoginClick }: { disabled?: boolea
                 <path d="M2.5 11h9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
               </svg>
             </ToolBtn>
-            <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFile} />
+            <input ref={fileRef} type="file" accept="image/*,.pdf,.txt,.md,.csv,.json,.xml,.html,.rtf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" style={{ display: "none" }} onChange={handleFile} />
 
             <ToolBtn onClick={handleClipboard} title="Paste from clipboard">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
