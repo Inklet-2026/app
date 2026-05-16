@@ -254,9 +254,8 @@ function VaultPicker({ vaults, onSelect, onBrowse }: {
           onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-card)"}
           onMouseLeave={(e) => e.currentTarget.style.background = "none"}
         >
-          <span style={{ flex: 1 }}>{v.name}</span>
           <span style={{
-            fontSize: 9, color: "var(--text-muted)", maxWidth: 100,
+            fontSize: 10, color: "var(--text-muted)", flex: 1,
             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const,
             direction: "rtl" as const, textAlign: "left" as const,
           }}>{v.path}</span>
