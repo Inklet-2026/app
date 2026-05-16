@@ -45,4 +45,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   quitApp: () => {
     ipcRenderer.send("quit-app");
   },
+  setOpenAtLogin: (value: boolean) => {
+    ipcRenderer.send("set-open-at-login", value);
+  },
+  getOpenAtLogin: () => ipcRenderer.invoke("get-open-at-login"),
 });

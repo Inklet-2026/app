@@ -12,7 +12,7 @@ export default function Header({ username, onLogout, onLoginClick }: Props) {
 
   function handleLoginClick() {
     if (username) {
-      onLogout();
+      (window as any).electronAPI?.openExternal("https://www.iminklet.com");
     } else if (loginRef.current) {
       const r = loginRef.current.getBoundingClientRect();
       const sx = window.screenX || 0;

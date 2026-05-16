@@ -11,6 +11,7 @@ let closeToTray = true;
 
 function registerHotkey(accelerator: string) {
   globalShortcut.unregisterAll();
+  if (!accelerator) return;
   try {
     globalShortcut.register(accelerator, () => {
       if (!win) return;
@@ -23,7 +24,10 @@ function registerHotkey(accelerator: string) {
     });
     currentShortcut = accelerator;
   } catch {
-    // invalid accelerator, keep old one
+    // invalid accelerator, re-register old one
+    if (currentShortcut && currentShortcut !== accelerator) {
+      registerHotkey(currentShortcut);
+    }
   }
 }
 
@@ -114,7 +118,7 @@ ipcMain.on("show-login-popup", (_e, { x, y }: { x: number; y: number }) => {
 });
 
 ipcMain.on("show-settings-popup", (_e, { x, y }: { x: number; y: number }) => {
-  showPopup("settings", 240, 210, x, y, {
+  showPopup("settings", 240, 195, x, y, {
     hotkey: currentShortcut,
     closeToTray: closeToTray ? "true" : "false",
   });
@@ -140,6 +144,14 @@ ipcMain.on("update-close-to-tray", (_e, value: boolean) => {
 ipcMain.on("quit-app", () => {
   closeToTray = false;
   app.quit();
+});
+
+ipcMain.on("set-open-at-login", (_e, value: boolean) => {
+  app.setLoginItemSettings({ openAtLogin: value });
+});
+
+ipcMain.handle("get-open-at-login", () => {
+  return app.getLoginItemSettings().openAtLogin;
 });
 
 ipcMain.handle("fetch-og", async (_e, url: string) => {
