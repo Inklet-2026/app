@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, screen, shell } from "electron";
+import { app, BrowserWindow, globalShortcut, ipcMain, screen, shell } from "electron";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -6,6 +6,26 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 let win: BrowserWindow | null = null;
 let popup: BrowserWindow | null = null;
+let currentShortcut = "CommandOrControl+L";
+let closeToTray = true;
+
+function registerHotkey(accelerator: string) {
+  globalShortcut.unregisterAll();
+  try {
+    globalShortcut.register(accelerator, () => {
+      if (!win) return;
+      if (win.isVisible() && win.isFocused()) {
+        win.hide();
+      } else {
+        win.show();
+        win.focus();
+      }
+    });
+    currentShortcut = accelerator;
+  } catch {
+    // invalid accelerator, keep old one
+  }
+}
 
 function createWindow() {
   win = new BrowserWindow({
@@ -26,11 +46,20 @@ function createWindow() {
     },
   });
 
+  win.on("close", (e) => {
+    if (closeToTray && win) {
+      e.preventDefault();
+      win.hide();
+    }
+  });
+
   if (process.env.VITE_DEV_SERVER_URL) {
     win.loadURL(process.env.VITE_DEV_SERVER_URL);
   } else {
     win.loadFile(path.join(__dirname, "../dist/index.html"));
   }
+
+  registerHotkey(currentShortcut);
 }
 
 ipcMain.on("resize-window", (_e, { width, height }: { width: number; height: number }) => {
@@ -85,7 +114,10 @@ ipcMain.on("show-login-popup", (_e, { x, y }: { x: number; y: number }) => {
 });
 
 ipcMain.on("show-settings-popup", (_e, { x, y }: { x: number; y: number }) => {
-  showPopup("settings", 220, 160, x, y);
+  showPopup("settings", 240, 210, x, y, {
+    hotkey: currentShortcut,
+    closeToTray: closeToTray ? "true" : "false",
+  });
 });
 
 ipcMain.on("login-success", (_e, data: { username: string }) => {
@@ -95,6 +127,19 @@ ipcMain.on("login-success", (_e, data: { username: string }) => {
 
 ipcMain.on("open-external", (_e, url: string) => {
   shell.openExternal(url);
+});
+
+ipcMain.on("update-hotkey", (_e, accelerator: string) => {
+  registerHotkey(accelerator);
+});
+
+ipcMain.on("update-close-to-tray", (_e, value: boolean) => {
+  closeToTray = value;
+});
+
+ipcMain.on("quit-app", () => {
+  closeToTray = false;
+  app.quit();
 });
 
 ipcMain.handle("fetch-og", async (_e, url: string) => {
@@ -137,10 +182,18 @@ ipcMain.handle("fetch-og", async (_e, url: string) => {
 
 app.whenReady().then(createWindow);
 
+app.on("will-quit", () => {
+  globalShortcut.unregisterAll();
+});
+
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 
 app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  } else if (win && !win.isVisible()) {
+    win.show();
+  }
 });

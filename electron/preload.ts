@@ -36,4 +36,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
   openExternal: (url: string) => {
     ipcRenderer.send("open-external", url);
   },
+  updateHotkey: (accelerator: string) => {
+    ipcRenderer.send("update-hotkey", accelerator);
+  },
+  updateCloseToTray: (value: boolean) => {
+    ipcRenderer.send("update-close-to-tray", value);
+  },
+  quitApp: () => {
+    ipcRenderer.send("quit-app");
+  },
 });
