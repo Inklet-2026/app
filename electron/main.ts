@@ -86,7 +86,7 @@ function createWindow() {
     trafficLightPosition: { x: 14, y: 12 },
     transparent: true,
     hasShadow: true,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     resizable: false,
     maximizable: false,
     fullscreenable: false,
@@ -102,6 +102,10 @@ function createWindow() {
       e.preventDefault();
       win.hide();
     }
+  });
+
+  win.on("blur", () => {
+    if (win && !popup) win.hide();
   });
 
   if (process.env.VITE_DEV_SERVER_URL) {
