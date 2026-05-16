@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { SiObsidian, SiLogseq, SiNotion } from "react-icons/si";
 import { TbBrandCraft } from "react-icons/tb";
 
@@ -189,7 +189,7 @@ function SyncButton() {
             <circle cx="5" cy="5" r="3.5" stroke="currentColor" strokeWidth="1.2" opacity="0.25"/>
             <path d="M8.5 5a3.5 3.5 0 0 0-3.5-3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
           </svg>
-          syncing...
+          Syncing...
         </>
       ) : state === "done" ? (
         <>
@@ -197,9 +197,9 @@ function SyncButton() {
             <path d="M2 5.5l2.5 2.5 3.5-4.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"
               strokeDasharray="12" strokeDashoffset="12" style={{ animation: "checkDraw 400ms ease-out forwards" }}/>
           </svg>
-          synced
+          Synced
         </>
-      ) : "sync"}
+      ) : "Sync"}
     </button>
   );
 }
@@ -214,15 +214,13 @@ export default function SourcesPopup() {
     });
   }, []);
 
-  const autoResize = useCallback(() => {
-    if (containerRef.current) {
-      const h = Math.min(containerRef.current.scrollHeight + 4, 400);
-      (window as any).electronAPI?.resizeSelf(260, h);
-    }
-  }, []);
-
   useEffect(() => {
-    autoResize();
+    requestAnimationFrame(() => {
+      if (containerRef.current) {
+        const h = Math.min(containerRef.current.offsetHeight + 4, 400);
+        (window as any).electronAPI?.resizeSelf(260, h);
+      }
+    });
   });
 
   async function connectSource(type: "obsidian" | "logseq") {
