@@ -78,7 +78,7 @@ export default function SettingsPopup() {
         <button
           onClick={() => setRecording(true)}
           style={{
-            fontSize: 11, color: recording ? "var(--accent)" : "var(--text-muted)",
+            fontSize: 13, color: recording ? "var(--accent)" : "var(--text-muted)",
             background: "var(--bg-input)", border: "1px solid var(--border)",
             padding: "2px 8px", borderRadius: 4, fontFamily: "monospace",
             cursor: "pointer", minWidth: 50, textAlign: "center",

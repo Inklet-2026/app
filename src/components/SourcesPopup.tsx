@@ -214,6 +214,9 @@ export default function SourcesPopup() {
   }, []);
 
   useEffect(() => {
+    document.documentElement.style.height = "auto";
+    document.body.style.height = "auto";
+    document.getElementById("root")!.style.height = "auto";
     requestAnimationFrame(() => {
       const h = Math.min(document.body.scrollHeight, 400);
       (window as any).electronAPI?.resizeSelf(260, h);
