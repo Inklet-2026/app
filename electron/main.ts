@@ -7,6 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 let win: BrowserWindow | null = null;
 let popup: BrowserWindow | null = null;
+let popupBlurLocked = false;
 let currentShortcut = "CommandOrControl+L";
 let closeToTray = true;
 
@@ -171,6 +172,7 @@ function showPopup(type: string, w: number, h: number, anchorX: number, anchorY:
   }
 
   popup.on("blur", () => {
+    if (popupBlurLocked) return;
     if (popup && !popup.isDestroyed()) { popup.close(); popup = null; }
   });
   popup.on("closed", () => { popup = null; });
@@ -280,11 +282,15 @@ function startSyncTimer() {
 }
 
 ipcMain.handle("select-folder", async () => {
-  if (!win) return null;
-  const result = await dialog.showOpenDialog(win, {
+  const parent = popup ?? win;
+  if (!parent) return null;
+  popupBlurLocked = true;
+  const result = await dialog.showOpenDialog(parent, {
     properties: ["openDirectory"],
     message: "Select vault or graph folder",
   });
+  popupBlurLocked = false;
+  if (popup) popup.focus();
   if (result.canceled || !result.filePaths[0]) return null;
   return result.filePaths[0];
 });
