@@ -56,6 +56,17 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.send("set-open-at-login", value);
   },
   getOpenAtLogin: () => ipcRenderer.invoke("get-open-at-login"),
+  updateSkip: (version: string) => ipcRenderer.send("update-skip", version),
+  updateLater: () => ipcRenderer.send("update-later"),
+  updateInstall: () => ipcRenderer.send("update-install"),
+  updateRestart: () => ipcRenderer.send("update-restart"),
+  checkForUpdates: () => ipcRenderer.send("check-for-updates"),
+  onUpdateProgress: (cb: (pct: number) => void) => {
+    ipcRenderer.on("update-download-progress", (_e, pct) => cb(pct));
+  },
+  onUpdateDownloaded: (cb: () => void) => {
+    ipcRenderer.on("update-downloaded", () => cb());
+  },
   showSourcesPopup: (x: number, y: number) => {
     ipcRenderer.send("show-sources-popup", { x, y });
   },

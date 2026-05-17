@@ -126,9 +126,22 @@ export default function SettingsPopup() {
         </svg>
       </button>
 
+      <button
+        onClick={() => (window as any).electronAPI?.checkForUpdates()}
+        style={{
+          ...row, width: "100%", background: "none", border: "none",
+          cursor: "pointer", textAlign: "left", fontFamily: "var(--font-sans)",
+          transition: "background 80ms",
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.background = "var(--bg-card)"}
+        onMouseLeave={(e) => e.currentTarget.style.background = "none"}
+      >
+        <span style={{ fontSize: 12, color: "var(--text)" }}>Check for updates</span>
+      </button>
+
       <p style={{
         fontSize: 10, color: "var(--text-muted)", textAlign: "center",
-        margin: "8px 0 0", opacity: 0.5,
+        margin: "4px 0 0", opacity: 0.5,
       }}>
         inklet Portal v0.1.0
       </p>

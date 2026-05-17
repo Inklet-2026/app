@@ -2,7 +2,7 @@
   "name": "inklet-portal",
   "version": "0.1.0",
   "description": "Push content to your inklet e-ink displays",
-  "author": "inklet <core@iminklet.com>",
+  "author": "",
   "main": "dist-electron/main.js",
   "type": "module",
   "scripts": {
@@ -13,10 +13,10 @@
     "test:watch": "vitest"
   },
   "keywords": [],
-  "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.28.2",
   "dependencies": {
+    "electron-updater": "^6.8.3",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-icons": "^5.6.0",

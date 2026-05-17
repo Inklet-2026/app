@@ -93,6 +93,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: 500,
     height: 179,
+    icon: path.join(__dirname, "../resources/icon.png"),
     titleBarStyle: "hiddenInset",
     trafficLightPosition: { x: 14, y: 12 },
     transparent: true,
@@ -125,6 +126,11 @@ function createWindow() {
   currentShortcut = getHotkey();
   closeToTray = getCloseToTray();
   registerHotkey(currentShortcut);
+
+  initAutoUpdater(win!, path.join(__dirname, "preload.mjs"));
+  if (!process.env.VITE_DEV_SERVER_URL) {
+    setTimeout(checkForUpdates, 3000);
+  }
 }
 
 ipcMain.on("resize-window", (_e, { width, height }: { width: number; height: number }) => {
@@ -195,7 +201,7 @@ ipcMain.on("show-login-popup", (_e, { x, y }: { x: number; y: number }) => {
 });
 
 ipcMain.on("show-settings-popup", (_e, { x, y }: { x: number; y: number }) => {
-  showPopup("settings", 240, 195, x, y, {
+  showPopup("settings", 240, 225, x, y, {
     hotkey: currentShortcut,
     closeToTray: closeToTray ? "true" : "false",
   });
@@ -241,6 +247,10 @@ ipcMain.handle("auth-google", async () => {
 ipcMain.on("login-success", (_e, data: { username: string }) => {
   if (win) win.webContents.send("auth-changed", data);
   if (popup && !popup.isDestroyed()) { popup.close(); popup = null; }
+});
+
+ipcMain.on("check-for-updates", () => {
+  checkForUpdates();
 });
 
 ipcMain.on("open-external", (_e, url: string) => {
@@ -312,6 +322,7 @@ ipcMain.handle("fetch-og", async (_e, url: string) => {
 
 import { loadSources, saveSource, removeSource, updateSourceConfig, syncSource, getSyncFrequency, setSyncFrequency, getHotkey, setHotkey as storeHotkey, getCloseToTray, setCloseToTray as storeCloseToTray, detectObsidianVaults, detectLogseqGraphs } from "./sync.js";
 import { login, register, logout, getMe, tryRestore, startGoogleOAuth, getStoredUser, handleOAuthCallback, registerProtocol } from "./auth.js";
+import { initAutoUpdater, checkForUpdates } from "./updater.js";
 
 let syncTimer: ReturnType<typeof setInterval> | null = null;
 
