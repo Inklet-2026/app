@@ -201,7 +201,7 @@ ipcMain.on("show-login-popup", (_e, { x, y }: { x: number; y: number }) => {
 });
 
 ipcMain.on("show-settings-popup", (_e, { x, y }: { x: number; y: number }) => {
-  showPopup("settings", 240, 200, x, y, {
+  showPopup("settings", 240, 215, x, y, {
     hotkey: currentShortcut,
     closeToTray: closeToTray ? "true" : "false",
   });
