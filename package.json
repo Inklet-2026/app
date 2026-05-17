@@ -1,12 +1,13 @@
 {
-  "name": "inklet-app",
-  "version": "1.0.0",
-  "description": "",
+  "name": "inklet-portal",
+  "version": "0.1.0",
+  "description": "Push content to your inklet e-ink displays",
+  "author": "inklet <core@iminklet.com>",
   "main": "dist-electron/main.js",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && electron-builder",
+    "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
