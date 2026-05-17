@@ -123,7 +123,7 @@ export default function LoginPopup() {
       }}>
         Don't have an account?{" "}
         <span
-          onClick={() => (window as any).electronAPI?.openExternal("https://www.iminklet.com")}
+          onClick={() => (window as any).electronAPI?.openExternal("https://portal.iminklet.com")}
           style={{ color: "var(--text-secondary)", textDecoration: "underline", cursor: "pointer" }}
         >Sign up</span>
       </p>

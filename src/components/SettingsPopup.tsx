@@ -110,7 +110,7 @@ export default function SettingsPopup() {
       </div>
 
       <button
-        onClick={() => (window as any).electronAPI?.openExternal("https://www.iminklet.com")}
+        onClick={() => (window as any).electronAPI?.openExternal("https://portal.iminklet.com")}
         style={{
           ...row, width: "100%", background: "none", border: "none",
           cursor: "pointer", textAlign: "left", fontFamily: "var(--font-sans)",

@@ -1,5 +1,5 @@
 appId: com.inklet.portal
-productName: Inklet Portal
+productName: inklet Portal
 directories:
   buildResources: resources
   output: release
