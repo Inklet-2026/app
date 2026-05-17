@@ -33,7 +33,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   authMe: () => ipcRenderer.invoke("auth-me"),
   authRestore: () => ipcRenderer.invoke("auth-restore"),
   authStoredUser: () => ipcRenderer.invoke("auth-stored-user"),
-  authGoogle: () => ipcRenderer.send("auth-google"),
+  authGoogle: () => ipcRenderer.invoke("auth-google"),
   onAuthChanged: (cb: (user: any) => void) => {
     ipcRenderer.on("auth-changed", (_e, user) => cb(user));
   },

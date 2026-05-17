@@ -232,9 +232,10 @@ ipcMain.handle("auth-stored-user", () => {
   return getStoredUser();
 });
 
-ipcMain.on("auth-google", () => {
-  const url = getOAuthGoogleUrl();
-  shell.openExternal(url);
+ipcMain.handle("auth-google", async () => {
+  const user = await startGoogleOAuth();
+  if (user && win) win.webContents.send("auth-changed", user);
+  return user;
 });
 
 ipcMain.on("login-success", (_e, data: { username: string }) => {
@@ -310,7 +311,7 @@ ipcMain.handle("fetch-og", async (_e, url: string) => {
 // --- Source management (Obsidian / Logseq) ---
 
 import { loadSources, saveSource, removeSource, updateSourceConfig, syncSource, getSyncFrequency, setSyncFrequency, getHotkey, setHotkey as storeHotkey, getCloseToTray, setCloseToTray as storeCloseToTray, detectObsidianVaults, detectLogseqGraphs } from "./sync.js";
-import { login, register, logout, getMe, tryRestore, getOAuthGoogleUrl, getStoredUser } from "./auth.js";
+import { login, register, logout, getMe, tryRestore, startGoogleOAuth, getStoredUser } from "./auth.js";
 
 let syncTimer: ReturnType<typeof setInterval> | null = null;
 

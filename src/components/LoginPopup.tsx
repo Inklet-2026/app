@@ -53,7 +53,7 @@ export default function LoginPopup() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
-        placeholder="Email"
+        placeholder="Email or username"
         autoFocus
         disabled={loading}
         style={{
@@ -80,12 +80,19 @@ export default function LoginPopup() {
         }}
       />
 
-      <button onClick={handleSubmit} disabled={loading} style={{
-        width: "100%", padding: "8px", borderRadius: 8,
-        background: "var(--accent)", color: "var(--bg)",
-        border: "none", cursor: loading ? "wait" : "pointer", fontSize: 13, fontWeight: 500,
-        fontFamily: "var(--font-sans)", opacity: loading ? 0.6 : 1,
-      }}>
+      <button
+        onClick={handleSubmit}
+        disabled={loading || !email.trim() || !password}
+        style={{
+          width: "100%", padding: "8px", borderRadius: 8,
+          background: "var(--accent)", color: "var(--bg)",
+          border: "none",
+          cursor: loading || !email.trim() || !password ? "default" : "pointer",
+          fontSize: 13, fontWeight: 500, fontFamily: "var(--font-sans)",
+          opacity: loading || !email.trim() || !password ? 0.3 : 1,
+          transition: "opacity 150ms",
+        }}
+      >
         {loading ? "Signing in..." : "Sign in"}
       </button>
 
