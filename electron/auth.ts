@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, shell } from "electron";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -159,42 +159,34 @@ export async function tryRestore(): Promise<AuthUser | null> {
   return getMe();
 }
 
+let oauthResolve: ((user: AuthUser | null) => void) | null = null;
+
 export function startGoogleOAuth(): Promise<AuthUser | null> {
   return new Promise((resolve) => {
-    const oauthWin = new BrowserWindow({
-      width: 500, height: 600,
-      title: "Sign in with Google",
-      alwaysOnTop: true,
-    });
-
-    oauthWin.loadURL(`${AUTH_URL}/auth/oauth/google`);
-
-    oauthWin.webContents.on("will-redirect", async (_e, url) => {
-      const parsed = new URL(url);
-      const accessToken = parsed.searchParams.get("accessToken");
-      const refreshToken = parsed.searchParams.get("refreshToken");
-
-      if (accessToken && refreshToken) {
-        writeAuth({ accessToken, refreshToken, user: null });
-        const user = await getMe();
-        oauthWin.close();
-        resolve(user);
-      }
-    });
-
-    oauthWin.webContents.on("will-navigate", async (_e, url) => {
-      const parsed = new URL(url);
-      const accessToken = parsed.searchParams.get("accessToken");
-      const refreshToken = parsed.searchParams.get("refreshToken");
-
-      if (accessToken && refreshToken) {
-        writeAuth({ accessToken, refreshToken, user: null });
-        const user = await getMe();
-        oauthWin.close();
-        resolve(user);
-      }
-    });
-
-    oauthWin.on("closed", () => resolve(null));
+    oauthResolve = resolve;
+    shell.openExternal(`${AUTH_URL}/auth/oauth/google?client=desktop`);
   });
+}
+
+export async function handleOAuthCallback(url: string): Promise<AuthUser | null> {
+  try {
+    const parsed = new URL(url);
+    const accessToken = parsed.searchParams.get("accessToken");
+    const refreshToken = parsed.searchParams.get("refreshToken");
+
+    if (accessToken && refreshToken) {
+      writeAuth({ accessToken, refreshToken, user: null });
+      const user = await getMe();
+      if (oauthResolve) {
+        oauthResolve(user);
+        oauthResolve = null;
+      }
+      return user;
+    }
+  } catch { /* invalid url */ }
+  return null;
+}
+
+export function registerProtocol() {
+  app.setAsDefaultProtocolClient("inklet");
 }

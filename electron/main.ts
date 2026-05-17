@@ -311,7 +311,7 @@ ipcMain.handle("fetch-og", async (_e, url: string) => {
 // --- Source management (Obsidian / Logseq) ---
 
 import { loadSources, saveSource, removeSource, updateSourceConfig, syncSource, getSyncFrequency, setSyncFrequency, getHotkey, setHotkey as storeHotkey, getCloseToTray, setCloseToTray as storeCloseToTray, detectObsidianVaults, detectLogseqGraphs } from "./sync.js";
-import { login, register, logout, getMe, tryRestore, startGoogleOAuth, getStoredUser } from "./auth.js";
+import { login, register, logout, getMe, tryRestore, startGoogleOAuth, getStoredUser, handleOAuthCallback, registerProtocol } from "./auth.js";
 
 let syncTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -414,6 +414,31 @@ ipcMain.handle("get-sync-frequency", () => getSyncFrequency());
 ipcMain.on("show-sources-popup", (_e, { x, y }: { x: number; y: number }) => {
   showPopup("sources", 260, 200, x, y);
 });
+
+registerProtocol();
+
+async function handleDeepLink(url: string) {
+  if (url.startsWith("inklet://")) {
+    const user = await handleOAuthCallback(url);
+    if (user && win) {
+      win.webContents.send("auth-changed", user);
+      win.show();
+      win.focus();
+    }
+  }
+}
+
+app.on("open-url", (_e, url) => handleDeepLink(url));
+
+app.on("second-instance", (_e, argv) => {
+  const url = argv.find((a) => a.startsWith("inklet://"));
+  if (url) handleDeepLink(url);
+  if (win) { win.show(); win.focus(); }
+});
+
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+}
 
 app.whenReady().then(() => {
   createWindow();
