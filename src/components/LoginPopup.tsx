@@ -1,10 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function LoginPopup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (error) {
+      const t = setTimeout(() => setError(""), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [error]);
 
   async function handleSubmit() {
     if (!email.trim() || !password) return;
@@ -20,21 +27,27 @@ export default function LoginPopup() {
 
   return (
     <div style={{
-      background: "var(--bg)", borderRadius: 12, padding: 20,
+      background: "var(--bg)", borderRadius: 12, padding: "16px 20px",
       height: "100vh", display: "flex", flexDirection: "column",
+      position: "relative",
     }}>
+      {error && (
+        <div style={{
+          position: "absolute", top: 8, left: 20, right: 20,
+          background: "#F0E8E8", borderRadius: 6,
+          padding: "5px 10px", fontSize: 11, color: "#8B4444",
+          textAlign: "center", animation: "modalIn 150ms ease-out",
+        }}>
+          {error}
+        </div>
+      )}
+
       <p style={{
         fontFamily: "var(--font-serif)", fontSize: 16, fontWeight: 400,
-        margin: "0 0 14px", color: "var(--text)", textAlign: "center",
+        margin: "0 0 12px", color: "var(--text)", textAlign: "center",
       }}>
         Sign in to inklet
       </p>
-
-      {error && (
-        <p style={{ fontSize: 11, color: "#8B4444", textAlign: "center", margin: "0 0 8px" }}>
-          {error}
-        </p>
-      )}
 
       <input
         value={email}
@@ -47,7 +60,7 @@ export default function LoginPopup() {
           width: "100%", fontSize: 13, padding: "8px 10px",
           borderRadius: 8, border: "1px solid var(--border)",
           background: "var(--bg-input)", outline: "none",
-          color: "var(--text)", marginBottom: 8,
+          color: "var(--text)", marginBottom: 6,
           opacity: loading ? 0.6 : 1,
         }}
       />
@@ -62,7 +75,7 @@ export default function LoginPopup() {
           width: "100%", fontSize: 13, padding: "8px 10px",
           borderRadius: 8, border: "1px solid var(--border)",
           background: "var(--bg-input)", outline: "none",
-          color: "var(--text)", marginBottom: 10,
+          color: "var(--text)", marginBottom: 8,
           opacity: loading ? 0.6 : 1,
         }}
       />
@@ -84,7 +97,7 @@ export default function LoginPopup() {
           background: "var(--bg-input)", color: "var(--text-secondary)",
           border: "1px solid var(--border)", cursor: "pointer",
           fontSize: 12, fontFamily: "var(--font-sans)",
-          marginTop: 8, display: "flex", alignItems: "center",
+          marginTop: 6, display: "flex", alignItems: "center",
           justifyContent: "center", gap: 6,
         }}
       >
@@ -99,7 +112,7 @@ export default function LoginPopup() {
 
       <p style={{
         fontSize: 11, color: "var(--text-muted)", textAlign: "center",
-        margin: "10px 0 0",
+        margin: "8px 0 0",
       }}>
         Don't have an account?{" "}
         <span

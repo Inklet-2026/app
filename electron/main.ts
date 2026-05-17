@@ -191,7 +191,7 @@ function showPopup(type: string, w: number, h: number, anchorX: number, anchorY:
 }
 
 ipcMain.on("show-login-popup", (_e, { x, y }: { x: number; y: number }) => {
-  showPopup("login", 260, 300, x, y);
+  showPopup("login", 260, 265, x, y);
 });
 
 ipcMain.on("show-settings-popup", (_e, { x, y }: { x: number; y: number }) => {
