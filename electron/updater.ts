@@ -1,5 +1,9 @@
 import { autoUpdater } from "electron-updater";
 import { BrowserWindow, ipcMain } from "electron";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 let win: BrowserWindow | null = null;
 let updateWin: BrowserWindow | null = null;
@@ -79,7 +83,6 @@ function showUpdateDialog(info: any, preloadPath: string) {
   if (process.env.VITE_DEV_SERVER_URL) {
     updateWin.loadURL(`${process.env.VITE_DEV_SERVER_URL}?${params}`);
   } else {
-    const path = require("node:path");
     updateWin.loadFile(path.join(__dirname, "../dist/index.html"), { search: params.toString() });
   }
 

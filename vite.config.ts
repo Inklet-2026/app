@@ -6,7 +6,16 @@ export default defineConfig({
   plugins: [
     react(),
     electron({
-      main: { entry: "electron/main.ts" },
+      main: {
+        entry: "electron/main.ts",
+        vite: {
+          build: {
+            rollupOptions: {
+              external: ["electron-updater"],
+            },
+          },
+        },
+      },
       preload: { input: "electron/preload.ts" },
     }),
   ],
