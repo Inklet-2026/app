@@ -27,11 +27,18 @@ contextBridge.exposeInMainWorld("electronAPI", {
   showSettingsPopup: (x: number, y: number) => {
     ipcRenderer.send("show-settings-popup", { x, y });
   },
+  authLogin: (email: string, password: string) => ipcRenderer.invoke("auth-login", email, password),
+  authRegister: (email: string, username: string, password: string) => ipcRenderer.invoke("auth-register", email, username, password),
+  authLogout: () => ipcRenderer.invoke("auth-logout"),
+  authMe: () => ipcRenderer.invoke("auth-me"),
+  authRestore: () => ipcRenderer.invoke("auth-restore"),
+  authStoredUser: () => ipcRenderer.invoke("auth-stored-user"),
+  authGoogle: () => ipcRenderer.send("auth-google"),
+  onAuthChanged: (cb: (user: any) => void) => {
+    ipcRenderer.on("auth-changed", (_e, user) => cb(user));
+  },
   sendLogin: (username: string) => {
     ipcRenderer.send("login-success", { username });
-  },
-  onLoginSuccess: (cb: (data: { username: string }) => void) => {
-    ipcRenderer.on("login-success", (_e, data) => cb(data));
   },
   openExternal: (url: string) => {
     ipcRenderer.send("open-external", url);

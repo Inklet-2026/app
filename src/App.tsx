@@ -22,12 +22,19 @@ function MainApp() {
   const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
-    (window as any).electronAPI?.onLoginSuccess?.((data: { username: string }) => {
-      setUsername(data.username);
+    (window as any).electronAPI?.authStoredUser?.().then((user: any) => {
+      if (user?.username) setUsername(user.username);
+    });
+    (window as any).electronAPI?.authRestore?.().then((user: any) => {
+      setUsername(user?.username ?? null);
+    });
+    (window as any).electronAPI?.onAuthChanged?.((user: any) => {
+      setUsername(user?.username ?? null);
     });
   }, []);
 
   function handleLogout() {
+    (window as any).electronAPI?.authLogout();
     setUsername(null);
   }
 

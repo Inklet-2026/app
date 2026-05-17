@@ -191,7 +191,7 @@ function showPopup(type: string, w: number, h: number, anchorX: number, anchorY:
 }
 
 ipcMain.on("show-login-popup", (_e, { x, y }: { x: number; y: number }) => {
-  showPopup("login", 260, 235, x, y);
+  showPopup("login", 260, 300, x, y);
 });
 
 ipcMain.on("show-settings-popup", (_e, { x, y }: { x: number; y: number }) => {
@@ -201,8 +201,44 @@ ipcMain.on("show-settings-popup", (_e, { x, y }: { x: number; y: number }) => {
   });
 });
 
+ipcMain.handle("auth-login", async (_e, email: string, password: string) => {
+  const user = await login(email, password);
+  if (win) win.webContents.send("auth-changed", user);
+  if (popup && !popup.isDestroyed()) { popup.close(); popup = null; }
+  return user;
+});
+
+ipcMain.handle("auth-register", async (_e, email: string, username: string, password: string) => {
+  const user = await register(email, username, password);
+  if (win) win.webContents.send("auth-changed", user);
+  if (popup && !popup.isDestroyed()) { popup.close(); popup = null; }
+  return user;
+});
+
+ipcMain.handle("auth-logout", async () => {
+  await logout();
+  if (win) win.webContents.send("auth-changed", null);
+});
+
+ipcMain.handle("auth-me", async () => {
+  return getMe();
+});
+
+ipcMain.handle("auth-restore", async () => {
+  return tryRestore();
+});
+
+ipcMain.handle("auth-stored-user", () => {
+  return getStoredUser();
+});
+
+ipcMain.on("auth-google", () => {
+  const url = getOAuthGoogleUrl();
+  shell.openExternal(url);
+});
+
 ipcMain.on("login-success", (_e, data: { username: string }) => {
-  if (win) win.webContents.send("login-success", data);
+  if (win) win.webContents.send("auth-changed", data);
   if (popup && !popup.isDestroyed()) { popup.close(); popup = null; }
 });
 
@@ -274,6 +310,7 @@ ipcMain.handle("fetch-og", async (_e, url: string) => {
 // --- Source management (Obsidian / Logseq) ---
 
 import { loadSources, saveSource, removeSource, updateSourceConfig, syncSource, getSyncFrequency, setSyncFrequency, getHotkey, setHotkey as storeHotkey, getCloseToTray, setCloseToTray as storeCloseToTray, detectObsidianVaults, detectLogseqGraphs } from "./sync.js";
+import { login, register, logout, getMe, tryRestore, getOAuthGoogleUrl, getStoredUser } from "./auth.js";
 
 let syncTimer: ReturnType<typeof setInterval> | null = null;
 
