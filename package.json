@@ -1,6 +1,6 @@
 {
   "name": "inklet-portal",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Push content to your inklet e-ink displays",
   "author": "",
   "main": "dist-electron/main.js",
